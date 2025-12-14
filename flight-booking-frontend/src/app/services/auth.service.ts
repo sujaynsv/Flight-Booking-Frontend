@@ -32,12 +32,12 @@ export class AuthService {
       withCredentials: true
     }).subscribe(
       (user) => {
-        console.log(' User already logged in:', user.email);
+        console.log('User already logged in:', user.email);
         this.currentUserSubject.next(user);
         this.isLoggedInSubject.next(true);
       },
       () => {
-        console.log('🚪 User not logged in');
+        console.log('User not logged in');
         this.currentUserSubject.next(null);
         this.isLoggedInSubject.next(false);
       }
@@ -45,7 +45,7 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<AuthUser> {
-    console.log('🔐 Logging in:', email);
+    console.log('Logging in:', email);
     
     return this.http.post<AuthUser>(
       `${this.apiUrl}/login`,
@@ -66,7 +66,7 @@ export class AuthService {
   }
 
   register(email: string, password: string, firstName: string, lastName: string): Observable<AuthUser> {
-    console.log('🔐 Registering:', email);
+    console.log('Registering:', email);
     
     return this.http.post<AuthUser>(
       `${this.apiUrl}/register`,

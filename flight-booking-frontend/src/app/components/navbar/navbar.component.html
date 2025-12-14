@@ -1,0 +1,16 @@
+<nav class="navbar">
+  <div class="navbar-brand">
+    <h1>Flight Booking</h1>
+  </div>
+  
+  <div class="navbar-content">
+    <div *ngIf="(currentUser$ | async) as user" class="user-info">
+      <span class="user-name">Welcome, {{ user.firstname }} {{ user.lastname }}</span>
+      <button (click)="logout()" class="btn btn-logout">Logout</button>
+    </div>
+    
+    <div *ngIf="!(isLoggedIn$ | async)" class="user-info">
+      <button routerLink="/login" class="btn btn-login">Login</button>
+    </div>
+  </div>
+</nav>
