@@ -15,13 +15,16 @@ interface AuthUser {
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = '/auth';  
+  private apiUrl = '/auth';
   
   private currentUserSubject = new BehaviorSubject<AuthUser | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
   
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
+
+  private authCheckComplete = new BehaviorSubject<boolean>(false);
+  authCheckComplete$ = this.authCheckComplete.asObservable();
 
   constructor(private http: HttpClient) {
     this.checkAuthStatus();
@@ -30,18 +33,20 @@ export class AuthService {
   checkAuthStatus(): void {
     this.http.get<AuthUser>(`${this.apiUrl}/me`, {
       withCredentials: true
-    }).subscribe(
-      (user) => {
+    }).subscribe({
+      next: (user) => {
         console.log('User already logged in:', user.email);
         this.currentUserSubject.next(user);
         this.isLoggedInSubject.next(true);
+        this.authCheckComplete.next(true);
       },
-      () => {
+      error: () => {
         console.log('User not logged in');
         this.currentUserSubject.next(null);
         this.isLoggedInSubject.next(false);
+        this.authCheckComplete.next(true);
       }
-    );
+    });
   }
 
   login(email: string, password: string): Observable<AuthUser> {
@@ -53,12 +58,12 @@ export class AuthService {
       { withCredentials: true }
     ).pipe(
       tap((response) => {
-        console.log(' Login successful', response);
+        console.log('Login successful', response);
         this.currentUserSubject.next(response);
         this.isLoggedInSubject.next(true);
       }),
       catchError((error) => {
-        console.error(' Login failed:', error);
+        console.error('Login failed:', error);
         const errorMessage = error?.error?.message || 'Login failed';
         return throwError(() => new Error(errorMessage));
       })
@@ -74,12 +79,12 @@ export class AuthService {
       { withCredentials: true }
     ).pipe(
       tap((response) => {
-        console.log(' Registration successful', response);
+        console.log('Registration successful', response);
         this.currentUserSubject.next(response);
         this.isLoggedInSubject.next(true);
       }),
       catchError((error) => {
-        console.error(' Registration failed:', error);
+        console.error('Registration failed:', error);
         const errorMessage = error?.error?.message || 'Registration failed';
         return throwError(() => new Error(errorMessage));
       })
@@ -87,7 +92,7 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
-    console.log('🚪 Logging out');
+    console.log('Logging out');
     
     return this.http.post<any>(
       `${this.apiUrl}/logout`,
@@ -95,12 +100,12 @@ export class AuthService {
       { withCredentials: true }
     ).pipe(
       tap(() => {
-        console.log(' Logged out');
+        console.log('Logout successful');
         this.currentUserSubject.next(null);
         this.isLoggedInSubject.next(false);
       }),
       catchError((error) => {
-        console.error(' Logout failed:', error);
+        console.error('Logout failed:', error);
         this.currentUserSubject.next(null);
         this.isLoggedInSubject.next(false);
         return throwError(() => new Error('Logout failed'));

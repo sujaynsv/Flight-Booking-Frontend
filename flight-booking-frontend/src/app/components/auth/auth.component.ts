@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';  
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';  
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { filter, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-auth',
-  standalone: true,  
-  imports: [CommonModule, ReactiveFormsModule],  
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './auth.component.html',
   styleUrls: ['./auth.component.css']
 })
@@ -25,12 +26,6 @@ export class AuthComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Check if already logged in
-    if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/search']);
-      return;
-    }
-
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
@@ -41,6 +36,17 @@ export class AuthComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]],
       firstName: ['', Validators.required],
       lastName: ['', Validators.required]
+    });
+
+    // Wait for auth check to complete, then redirect if already logged in
+    this.authService.authCheckComplete$.pipe(
+      filter(complete => complete),
+      take(1)
+    ).subscribe(() => {
+      if (this.authService.isLoggedIn()) {
+        console.log('User already logged in, redirecting to search');
+        this.router.navigate(['/search']);
+      }
     });
   }
 
@@ -57,12 +63,12 @@ export class AuthComponent implements OnInit {
 
     this.authService.login(email, password).subscribe({
       next: (response) => {
-        console.log(' Login successful!', response);
+        console.log('Login successful', response);
         this.loading = false;
         this.router.navigate(['/search']);
       },
       error: (error) => {
-        console.error(' Login error:', error);
+        console.error('Login error:', error);
         this.error = error.message || 'Login failed. Please try again.';
         this.loading = false;
       }
@@ -82,12 +88,12 @@ export class AuthComponent implements OnInit {
 
     this.authService.register(email, password, firstName, lastName).subscribe({
       next: (response) => {
-        console.log(' Registration successful!', response);
+        console.log('Registration successful', response);
         this.loading = false;
         this.router.navigate(['/search']);
       },
       error: (error) => {
-        console.error(' Registration error:', error);
+        console.error('Registration error:', error);
         this.error = error.message || 'Registration failed. Please try again.';
         this.loading = false;
       }

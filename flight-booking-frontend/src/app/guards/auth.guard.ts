@@ -1,32 +1,27 @@
-import { Injectable } from '@angular/core';
-import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { map, take } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class AuthGuard implements CanActivate {
-  
-  constructor(
-    private authService: AuthService,
-    private router: Router
-  ) {}
+export const AuthGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
-  canActivate(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): boolean {
-    console.log(' AuthGuard checking access to:', state.url);
-    
-    if (this.authService.isLoggedIn()) {
-      console.log(' User is logged in, allowing access');
-      return true;
-    } else {
-      console.log(' User not logged in, redirecting to /login');
-      this.router.navigate(['/login'], { 
-        queryParams: { returnUrl: state.url }
-      });
-      return false;
-    }
-  }
-}
+  return authService.isLoggedIn$.pipe(
+    take(1),
+    map(isLoggedIn => {
+      console.log('AuthGuard checking access to:', state.url, 'isLoggedIn:', isLoggedIn);
+      
+      if (isLoggedIn) {
+        console.log('User is logged in, allowing access');
+        return true;
+      } else {
+        console.log('User not logged in, redirecting to /login');
+        router.navigate(['/login'], { 
+          queryParams: { returnUrl: state.url }
+        });
+        return false;
+      }
+    })
+  );
+};
