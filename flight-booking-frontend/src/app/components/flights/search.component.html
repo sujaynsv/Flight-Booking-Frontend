@@ -1,0 +1,105 @@
+<div class="search-container">
+  <div class="search-card">
+    <h1>Search Flights</h1>
+    
+    <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+      <div class="form-group">
+        <label for="fromPlace">From</label>
+        <input 
+          id="fromPlace"
+          type="text" 
+          formControlName="fromPlace"
+          placeholder="e.g., Mumbai, Goa, Hyderabad"
+          [class.invalid]="searchForm.get('fromPlace')?.invalid && searchForm.get('fromPlace')?.touched"
+        />
+        <div class="field-error" *ngIf="searchForm.get('fromPlace')?.invalid && searchForm.get('fromPlace')?.touched">
+          Please enter departure city
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="toPlace">To</label>
+        <input 
+          id="toPlace"
+          type="text" 
+          formControlName="toPlace"
+          placeholder="e.g., Goa, Mumbai, Hyderabad" 
+          [class.invalid]="searchForm.get('toPlace')?.invalid && searchForm.get('toPlace')?.touched"
+        />
+        <div class="field-error" *ngIf="searchForm.get('toPlace')?.invalid && searchForm.get('toPlace')?.touched">
+          Please enter destination city
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="departureDate">Departure Date</label>
+        <input 
+          id="departureDate"
+          type="date" 
+          formControlName="departureDate"
+          [class.invalid]="searchForm.get('departureDate')?.invalid && searchForm.get('departureDate')?.touched"
+        />
+        <div class="field-error" *ngIf="searchForm.get('departureDate')?.invalid && searchForm.get('departureDate')?.touched">
+          Please select departure date
+        </div>
+      </div>
+
+      <button 
+        type="submit" 
+        class="btn btn-primary"
+        [disabled]="searchForm.invalid || loading"
+      >
+        {{ loading ? 'Searching...' : 'Search Flights' }}
+      </button>
+
+      <div *ngIf="error" class="error-message">
+        {{ error }}
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="flights.length > 0" class="flights-list">
+    <h2>Available Flights ({{ flights.length }})</h2>
+    
+    <div *ngFor="let flight of flights" class="flight-card">
+      <div class="flight-header">
+        <h3>{{ flight.airlineName }}</h3>
+        <span class="flight-number">{{ flight.flightNumber }}</span>
+      </div>
+      
+      <div class="flight-route">
+        <div class="location">
+          <span class="city">{{ flight.fromPlace }}</span>
+          <span class="time">{{ flight.departureDateTime | date:'short' }}</span>
+        </div>
+        
+        <div class="route-line">
+          <span></span>
+        </div>
+        
+        <div class="location">
+          <span class="city">{{ flight.toPlace }}</span>
+          <span class="time">{{ flight.arrivalDateTime | date:'short' }}</span>
+        </div>
+      </div>
+      
+      <div class="flight-details">
+        <div class="detail-item">
+          <span class="label">Price:</span>
+          <span class="value price">₹{{ flight.price }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="label">Available Seats:</span>
+          <span class="value">{{ flight.availableSeats }}</span>
+        </div>
+      </div>
+      
+      <button class="btn btn-book">Book Now</button>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && flights.length === 0 && searchForm.touched" class="no-results">
+    <p>✈️ No flights found for this route and date.</p>
+    <p>Try different cities or dates.</p>
+  </div>
+</div>
