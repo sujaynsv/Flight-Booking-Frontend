@@ -1,126 +1,135 @@
 <div class="auth-container">
   <div class="auth-card">
-    <h1>{{ showRegister ? 'Register' : 'Login' }}</h1>
-    
-    <!-- Error Message -->
-    <div *ngIf="error" class="error-message">
-      {{ error }}
+    <div *ngIf="!showRegister">
+      <h1>Login</h1>
+      <p>Welcome back! Please login to your account.</p>
+      
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+        <div *ngIf="error" class="error-message">
+          {{ error }}
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input 
+            id="email"
+            type="email" 
+            formControlName="email"
+            placeholder="Enter your email"
+            [class.invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+          />
+          <div class="field-error" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+            Please enter a valid email
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            id="password"
+            type="password" 
+            formControlName="password"
+            placeholder="Enter your password"
+            [class.invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+          />
+          <div class="field-error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+            Password must be at least 6 characters
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="loginForm.invalid || loading"
+        >
+          {{ loading ? 'Logging in...' : 'Login' }}
+        </button>
+      </form>
+
+      <div class="toggle-form">
+        <p>Don't have an account?</p>
+        <button (click)="toggleRegister()" class="toggle-link">Create an account</button>
+      </div>
     </div>
 
-    <!-- Login Form -->
-    <form *ngIf="!showRegister" [formGroup]="loginForm" (ngSubmit)="onLogin()">
-      <div class="form-group">
-        <label for="login-email">Email</label>
-        <input 
-          id="login-email"
-          type="email" 
-          formControlName="email"
-          placeholder="Enter your email"
-          [class.invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-        />
-        <div class="field-error" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
-          Please enter a valid email
+    <div *ngIf="showRegister">
+      <h1>Register</h1>
+      <p>Create a new account to get started.</p>
+      
+      <form [formGroup]="registerForm" (ngSubmit)="onRegister()">
+        <div *ngIf="error" class="error-message">
+          {{ error }}
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="login-password">Password</label>
-        <input 
-          id="login-password"
-          type="password" 
-          formControlName="password"
-          placeholder="Enter your password"
-          [class.invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-        />
-        <div class="field-error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
-          Password must be at least 6 characters
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input 
+            id="firstName"
+            type="text" 
+            formControlName="firstName"
+            placeholder="Enter your first name"
+            [class.invalid]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched"
+          />
+          <div class="field-error" *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched">
+            First name is required
+          </div>
         </div>
-      </div>
 
-      <button 
-        type="submit" 
-        class="btn btn-primary"
-        [disabled]="loginForm.invalid || loading"
-      >
-        {{ loading ? 'Logging in...' : 'Login' }}
-      </button>
-
-      <p class="toggle-text">
-        Don't have an account? 
-        <a (click)="toggleRegister()" class="link">Register here</a>
-      </p>
-    </form>
-
-    <!-- Register Form -->
-    <form *ngIf="showRegister" [formGroup]="registerForm" (ngSubmit)="onRegister()">
-      <div class="form-group">
-        <label for="register-firstName">First Name</label>
-        <input 
-          id="register-firstName"
-          type="text" 
-          formControlName="firstName"
-          placeholder="Enter your first name"
-          [class.invalid]="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched"
-        />
-        <div class="field-error" *ngIf="registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched">
-          First name is required
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input 
+            id="lastName"
+            type="text" 
+            formControlName="lastName"
+            placeholder="Enter your last name"
+            [class.invalid]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched"
+          />
+          <div class="field-error" *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched">
+            Last name is required
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="register-lastName">Last Name</label>
-        <input 
-          id="register-lastName"
-          type="text" 
-          formControlName="lastName"
-          placeholder="Enter your last name"
-          [class.invalid]="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched"
-        />
-        <div class="field-error" *ngIf="registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched">
-          Last name is required
+        <div class="form-group">
+          <label for="registerEmail">Email</label>
+          <input 
+            id="registerEmail"
+            type="email" 
+            formControlName="email"
+            placeholder="Enter your email"
+            [class.invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
+          />
+          <div class="field-error" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
+            Please enter a valid email
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="register-email">Email</label>
-        <input 
-          id="register-email"
-          type="email" 
-          formControlName="email"
-          placeholder="Enter your email"
-          [class.invalid]="registerForm.get('email')?.invalid && registerForm.get('email')?.touched"
-        />
-        <div class="field-error" *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched">
-          Please enter a valid email
+        <div class="form-group">
+          <label for="registerPassword">Password</label>
+          <input 
+            id="registerPassword"
+            type="password" 
+            formControlName="password"
+            placeholder="Enter your password"
+            [class.invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
+          />
+          <div class="field-error" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
+            Password must be at least 6 characters
+          </div>
         </div>
+
+        <button 
+          type="submit" 
+          class="btn btn-primary"
+          [disabled]="registerForm.invalid || loading"
+        >
+          {{ loading ? 'Registering...' : 'Register' }}
+        </button>
+      </form>
+
+      <div class="toggle-form">
+        <p>Already have an account?</p>
+        <button (click)="toggleRegister()" class="toggle-link">Login here</button>
       </div>
-
-      <div class="form-group">
-        <label for="register-password">Password</label>
-        <input 
-          id="register-password"
-          type="password" 
-          formControlName="password"
-          placeholder="Enter your password"
-          [class.invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
-        />
-        <div class="field-error" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-          Password must be at least 6 characters
-        </div>
-      </div>
-
-      <button 
-        type="submit" 
-        class="btn btn-primary"
-        [disabled]="registerForm.invalid || loading"
-      >
-        {{ loading ? 'Registering...' : 'Register' }}
-      </button>
-
-      <p class="toggle-text">
-        Already have an account? 
-        <a (click)="toggleRegister()" class="link">Login here</a>
-      </p>
-    </form>
+    </div>
   </div>
 </div>
