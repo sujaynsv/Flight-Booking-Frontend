@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthComponent } from './components/auth/auth.component';
-import { SearchComponent } from './components/flights/search.component';  //  Changed from FlightSearchComponent
+import { SearchComponent } from './components/flights/search.component'; 
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -10,7 +10,7 @@ export const routes: Routes = [
   },
   { 
     path: 'search', 
-    component: SearchComponent,  //  Changed from FlightSearchComponent
+    component: SearchComponent,  
     canActivate: [AuthGuard]
   },
   { 
@@ -18,8 +18,8 @@ export const routes: Routes = [
     redirectTo: '/search', 
     pathMatch: 'full' 
   },
-  { 
-    path: '**', 
-    redirectTo: '/search' 
-  }
+  // { 
+  //   path: '**', 
+  //   redirectTo: '/search' 
+  // }
 ];

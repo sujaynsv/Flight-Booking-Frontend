@@ -38,7 +38,6 @@ export class AuthComponent implements OnInit {
       lastName: ['', Validators.required]
     });
 
-    // Wait for auth check to complete, then redirect if already logged in
     this.authService.authCheckComplete$.pipe(
       filter(complete => complete),
       take(1)

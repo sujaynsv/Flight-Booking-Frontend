@@ -49,6 +49,15 @@
   font-size: 0.9rem;
 }
 
+/* AUTOCOMPLETE WRAPPER */
+.autocomplete-wrapper {
+  position: relative;
+}
+
+.autocomplete-wrapper input {
+  width: 100%;
+}
+
 .form-group input {
   width: 100%;
   padding: 0.75rem;
@@ -66,6 +75,56 @@
 
 .form-group input.invalid {
   border-color: #dc3545;
+}
+
+/* AUTOCOMPLETE SUGGESTIONS */
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.suggestions li {
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: #333;
+}
+
+.suggestions li:hover {
+  background-color: #f0f8ff;
+}
+
+.suggestions li:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.no-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  padding: 12px 16px;
+  color: #999;
+  font-size: 14px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
 }
 
 .field-error {

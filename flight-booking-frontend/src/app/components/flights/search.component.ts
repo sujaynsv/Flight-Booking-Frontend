@@ -16,12 +16,46 @@ export class SearchComponent implements OnInit {
   flights: Flight[] = [];
   loading = false;
   error: string | null = null;
+  minDate: string;
+
+  // Cities list
+  cities: string[] = [
+    'Mumbai',
+    'Delhi',
+    'Bangalore',
+    'Hyderabad',
+    'Chennai',
+    'Kolkata',
+    'Pune',
+    'Ahmedabad',
+    'Jaipur',
+    'Goa',
+    'Kochi',
+    'Lucknow',
+    'Chandigarh',
+    'Indore',
+    'Nagpur',
+    'Surat',
+    'Varanasi',
+    'Amritsar'
+  ];
+
+  // Filtered suggestions
+  fromSuggestions: string[] = [];
+  toSuggestions: string[] = [];
+  
+  // Show/hide suggestions
+  showFromSuggestions = false;
+  showToSuggestions = false;
 
   constructor(
     private fb: FormBuilder,
     private flightService: FlightService,
     private cdr: ChangeDetectorRef  
-  ) {}
+  ) {
+    const today = new Date();
+    this.minDate = today.toISOString().split('T')[0];
+  }
 
   ngOnInit(): void {
     this.searchForm = this.fb.group({
@@ -29,6 +63,57 @@ export class SearchComponent implements OnInit {
       toPlace: ['', Validators.required],
       departureDate: ['', Validators.required]
     });
+  }
+
+  // Filter cities for "From" field
+  onFromInput(event: any): void {
+    const value = event.target.value.toLowerCase();
+    if (value.length > 0) {
+      this.fromSuggestions = this.cities.filter(city => 
+        city.toLowerCase().includes(value)
+      );
+      this.showFromSuggestions = true;
+    } else {
+      this.showFromSuggestions = false;
+    }
+  }
+
+  // Filter cities for "To" field
+  onToInput(event: any): void {
+    const value = event.target.value.toLowerCase();
+    if (value.length > 0) {
+      this.toSuggestions = this.cities.filter(city => 
+        city.toLowerCase().includes(value)
+      );
+      this.showToSuggestions = true;
+    } else {
+      this.showToSuggestions = false;
+    }
+  }
+
+  // Select city from "From" suggestions
+  selectFromCity(city: string): void {
+    this.searchForm.patchValue({ fromPlace: city });
+    this.showFromSuggestions = false;
+  }
+
+  // Select city from "To" suggestions
+  selectToCity(city: string): void {
+    this.searchForm.patchValue({ toPlace: city });
+    this.showToSuggestions = false;
+  }
+
+  // Hide suggestions when clicking outside
+  onFromBlur(): void {
+    setTimeout(() => {
+      this.showFromSuggestions = false;
+    }, 200);
+  }
+
+  onToBlur(): void {
+    setTimeout(() => {
+      this.showToSuggestions = false;
+    }, 200);
   }
 
   onSearch(): void {

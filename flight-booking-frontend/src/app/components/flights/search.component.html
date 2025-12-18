@@ -5,38 +5,67 @@
     <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
       <div class="form-group">
         <label for="fromPlace">From</label>
-        <input 
-          id="fromPlace"
-          type="text" 
-          formControlName="fromPlace"
-          placeholder="e.g., Mumbai, Goa, Hyderabad"
-          [class.invalid]="searchForm.get('fromPlace')?.invalid && searchForm.get('fromPlace')?.touched"
-        />
+        <div class="autocomplete-wrapper">
+          <input 
+            id="fromPlace"
+            type="text" 
+            formControlName="fromPlace"
+            placeholder="e.g., Mumbai, Goa, Hyderabad"
+            (input)="onFromInput($event)"
+            (blur)="onFromBlur()"
+            autocomplete="off"
+            [class.invalid]="searchForm.get('fromPlace')?.invalid && searchForm.get('fromPlace')?.touched"
+          />
+          <ul class="suggestions" *ngIf="showFromSuggestions && fromSuggestions.length > 0">
+            <li *ngFor="let city of fromSuggestions" (click)="selectFromCity(city)">
+              {{ city }}
+            </li>
+          </ul>
+          <div class="no-suggestions" *ngIf="showFromSuggestions && fromSuggestions.length === 0">
+            No cities found
+          </div>
+        </div>
         <div class="field-error" *ngIf="searchForm.get('fromPlace')?.invalid && searchForm.get('fromPlace')?.touched">
           Please enter departure city
         </div>
       </div>
 
+      <!-- TO PLACE WITH AUTOCOMPLETE -->
       <div class="form-group">
         <label for="toPlace">To</label>
-        <input 
-          id="toPlace"
-          type="text" 
-          formControlName="toPlace"
-          placeholder="e.g., Goa, Mumbai, Hyderabad" 
-          [class.invalid]="searchForm.get('toPlace')?.invalid && searchForm.get('toPlace')?.touched"
-        />
+        <div class="autocomplete-wrapper">
+          <input 
+            id="toPlace"
+            type="text" 
+            formControlName="toPlace"
+            placeholder="e.g., Goa, Mumbai, Hyderabad" 
+            (input)="onToInput($event)"
+            (blur)="onToBlur()"
+            autocomplete="off"
+            [class.invalid]="searchForm.get('toPlace')?.invalid && searchForm.get('toPlace')?.touched"
+          />
+          <ul class="suggestions" *ngIf="showToSuggestions && toSuggestions.length > 0">
+            <li *ngFor="let city of toSuggestions" (click)="selectToCity(city)">
+              {{ city }}
+            </li>
+          </ul>
+          <div class="no-suggestions" *ngIf="showToSuggestions && toSuggestions.length === 0">
+            No cities found
+          </div>
+        </div>
         <div class="field-error" *ngIf="searchForm.get('toPlace')?.invalid && searchForm.get('toPlace')?.touched">
           Please enter destination city
         </div>
       </div>
 
+      <!-- DEPARTURE DATE -->
       <div class="form-group">
         <label for="departureDate">Departure Date</label>
         <input 
           id="departureDate"
           type="date" 
           formControlName="departureDate"
+          [min]="minDate"
           [class.invalid]="searchForm.get('departureDate')?.invalid && searchForm.get('departureDate')?.touched"
         />
         <div class="field-error" *ngIf="searchForm.get('departureDate')?.invalid && searchForm.get('departureDate')?.touched">
@@ -58,6 +87,7 @@
     </form>
   </div>
 
+  <!-- FLIGHTS LIST -->
   <div *ngIf="flights.length > 0" class="flights-list">
     <h2>Available Flights ({{ flights.length }})</h2>
     
@@ -74,7 +104,7 @@
         </div>
         
         <div class="route-line">
-          <span></span>
+          <span>→</span>
         </div>
         
         <div class="location">
@@ -98,8 +128,9 @@
     </div>
   </div>
 
+  <!-- NO RESULTS -->
   <div *ngIf="!loading && flights.length === 0 && searchForm.touched" class="no-results">
-    <p>✈️ No flights found for this route and date.</p>
+    <p>No flights found for this route and date.</p>
     <p>Try different cities or dates.</p>
   </div>
 </div>

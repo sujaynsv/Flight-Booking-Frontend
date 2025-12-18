@@ -9,7 +9,7 @@ import { throwError } from 'rxjs';
   providedIn: 'root'
 })
 export class FlightService {
-  private apiUrl = '/flight';
+  private apiUrl = 'http://localhost:8080/flight';
 
   constructor(private http: HttpClient) {}
 
