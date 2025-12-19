@@ -1,6 +1,6 @@
 <nav class="navbar">
   <div class="navbar-brand">
-    <h1>Flight Booking</h1>
+    <button routerLink="/search" class="booking-button">Flight Booking</button>
   </div>
   
   <div class="navbar-content">
@@ -11,6 +11,11 @@
     
     <div *ngIf="!(isLoggedIn$ | async)" class="user-info">
       <button routerLink="/login" class="btn btn-login">Login</button>
+    </div>
+
+    <div>
+
+      <button routerLink="/tickets">View Ticket</button>
     </div>
   </div>
 </nav>

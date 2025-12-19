@@ -35,7 +35,7 @@ export class BookingService {
         );
   }
 
-  cancenlBooking(pnr: string): Observable<{message: string}>{
+  cancelBooking(pnr: string): Observable<{message: string}>{
     console.log('Cancelling booking for PNR:', pnr);
 
     return this.http.delete<{message: string}>(

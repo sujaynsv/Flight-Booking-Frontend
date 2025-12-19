@@ -113,7 +113,11 @@ export class AuthService {
     );
   }
 
-  getCurrentUser(): AuthUser | null {
+  getCurrentUser(): Observable<AuthUser | null> {
+    return this.currentUser$;
+  }
+
+  getCurrentUserValue(): AuthUser | null{
     return this.currentUserSubject.value;
   }
 
