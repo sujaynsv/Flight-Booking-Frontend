@@ -30,7 +30,6 @@
         </div>
       </div>
 
-      <!-- TO PLACE WITH AUTOCOMPLETE -->
       <div class="form-group">
         <label for="toPlace">To</label>
         <div class="autocomplete-wrapper">
@@ -58,7 +57,6 @@
         </div>
       </div>
 
-      <!-- DEPARTURE DATE -->
       <div class="form-group">
         <label for="departureDate">Departure Date</label>
         <input 
@@ -87,7 +85,6 @@
     </form>
   </div>
 
-  <!-- FLIGHTS LIST -->
   <div *ngIf="flights.length > 0" class="flights-list">
     <h2>Available Flights ({{ flights.length }})</h2>
     
@@ -124,11 +121,10 @@
         </div>
       </div>
       
-      <button class="btn btn-book">Book Now</button>
+      <button class="btn btn-book" (click)="bookFlight(flight.id)">Book Now</button>
     </div>
   </div>
 
-  <!-- NO RESULTS -->
   <div *ngIf="!loading && flights.length === 0 && searchForm.touched" class="no-results">
     <p>No flights found for this route and date.</p>
     <p>Try different cities or dates.</p>

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { FlightService } from '../../services/flights.service';
 import { Flight, FlightSearchRequest } from '../../models/flight.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-search',
@@ -18,7 +19,6 @@ export class SearchComponent implements OnInit {
   error: string | null = null;
   minDate: string;
 
-  // Cities list
   cities: string[] = [
     'Mumbai',
     'Delhi',
@@ -40,17 +40,16 @@ export class SearchComponent implements OnInit {
     'Amritsar'
   ];
 
-  // Filtered suggestions
   fromSuggestions: string[] = [];
   toSuggestions: string[] = [];
   
-  // Show/hide suggestions
   showFromSuggestions = false;
   showToSuggestions = false;
 
   constructor(
     private fb: FormBuilder,
     private flightService: FlightService,
+    private router: Router,
     private cdr: ChangeDetectorRef  
   ) {
     const today = new Date();
@@ -65,7 +64,6 @@ export class SearchComponent implements OnInit {
     });
   }
 
-  // Filter cities for "From" field
   onFromInput(event: any): void {
     const value = event.target.value.toLowerCase();
     if (value.length > 0) {
@@ -78,7 +76,6 @@ export class SearchComponent implements OnInit {
     }
   }
 
-  // Filter cities for "To" field
   onToInput(event: any): void {
     const value = event.target.value.toLowerCase();
     if (value.length > 0) {
@@ -91,19 +88,16 @@ export class SearchComponent implements OnInit {
     }
   }
 
-  // Select city from "From" suggestions
   selectFromCity(city: string): void {
     this.searchForm.patchValue({ fromPlace: city });
     this.showFromSuggestions = false;
   }
 
-  // Select city from "To" suggestions
   selectToCity(city: string): void {
     this.searchForm.patchValue({ toPlace: city });
     this.showToSuggestions = false;
   }
 
-  // Hide suggestions when clicking outside
   onFromBlur(): void {
     setTimeout(() => {
       this.showFromSuggestions = false;
@@ -149,5 +143,10 @@ export class SearchComponent implements OnInit {
         this.cdr.detectChanges();     
       }
     });
+  }
+
+  bookFlight(flightId: string): void{
+    console.log('Booking flight with ID:', flightId);
+    this.router.navigate(['/booking', flightId])
   }
 }

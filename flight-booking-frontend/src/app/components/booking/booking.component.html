@@ -1,0 +1,37 @@
+<div class="booking-container">
+  <div class="booking-card">
+
+    <div *ngIf="flag">
+        <h2>{{successMessage}}</h2>
+        <p>PNR: {{pnr}}</p>
+    </div>
+    <h1>Book Flight</h1>
+
+    <form *ngIf="!flag" [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+      <h3>Contact Info</h3>
+      <input type="text" formControlName="name" placeholder="Your Name" />
+      <input type="email" formControlName="email" placeholder="Email" />
+      <h3>Passenger Details</h3>
+      <input type="text" formControlName="passengerName" placeholder="Passenger Name" />
+
+      <select formControlName="gender">
+        <option value="MALE">MALE</option>
+        <option value="FEMALE">FEMALE</option>
+      </select>
+      
+      <input type="number" formControlName="age" placeholder="Age" min="1" />
+      <select formControlName="mealPreference">
+        <option value="VEG">VEG</option>
+        <option value="NON_VEG">NON_VEG</option>
+      </select>
+      <input type="text" formControlName="seatNumber" placeholder="A1" />
+      <div *ngIf="error" class="error">{{ error }}</div>
+      <div class="buttons">
+        <button type="button" (click)="cancel()">Cancel</button>
+        <button type="submit">
+          {{ loading ? 'Booking...' : 'Book' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

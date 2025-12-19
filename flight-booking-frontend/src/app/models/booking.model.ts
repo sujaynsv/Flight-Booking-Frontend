@@ -1,6 +1,6 @@
 export interface Passenger {
     name: string;
-    gender :'M' | 'F' | 'OTHER';
+    gender :'MALE' | 'FEMALE';
     age: number;
     mealPreference: 'VEG' | 'NON_VEG';
 
