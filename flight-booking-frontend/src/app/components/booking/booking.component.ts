@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FlightService } from '../../services/flights.service';
 import { BookingService } from '../../services/booking.service';
@@ -13,7 +13,7 @@ import {ChangeDetectorRef} from '@angular/core';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './booking.component.html',
-//   styleUrls: ['./booking.component.css']
+  styleUrls: ['./booking.component.css']
 })
 export class BookingComponent implements OnInit {
   bookingForm!: FormGroup;
@@ -40,16 +40,37 @@ export class BookingComponent implements OnInit {
     this.bookingForm = this.fb.group({
       name: ['Sujay', Validators.required],
       email: ['sujaynsv@gmail.com', [Validators.required, Validators.email]],
-      gender: ['MALE', Validators.required],
-      mealPreference: ['VEG', Validators.required],
-      passengerName: ['Sujay', Validators.required],
-      age: ['18', [Validators.required, Validators.min(1)]],
-      seatNumber: ['A1', Validators.required]
+      passengers:this.fb.array([])
     });
 
-
+    this.addPassenger();
     this.loadFlightDetails();
   }
+
+  createPassengerForm(): FormGroup{ 
+    return this.fb.group({
+        passengerName:['', Validators.required],
+        age:['', Validators.required],
+        mealPreference:['',Validators.required],
+        gender:['',Validators.required],
+        seatNumber:['',Validators.required]
+    })
+  }
+  
+  get passengers(): FormArray{
+    return this.bookingForm.get('passengers') as FormArray
+  }
+
+  addPassenger(): void{
+    this.passengers.push(this.createPassengerForm());
+  }
+
+  removePassenger(index: number) : void{
+    if(this.passengers.length>1){
+        this.passengers.removeAt(index);
+    }
+  }
+
 
   loadFlightDetails(): void {
     this.flightService.getFlightById(this.flightId).subscribe({
@@ -67,6 +88,7 @@ export class BookingComponent implements OnInit {
   onSubmit(): void {
     if (this.bookingForm.invalid) {
       this.error = 'Please fill all fields displayed in the html';
+      this.bookingForm.markAllAsTouched();
       console.log(this.bookingForm.value);
       return;
     }
@@ -76,19 +98,23 @@ export class BookingComponent implements OnInit {
 
     this.loading = true;
 
+    const passengerData= this.passengers.controls.map(passenger=>({
+        name:passenger.value.passengerName,
+        gender:passenger.value.gender,
+        age:passenger.value.age,
+        mealPreference:passenger.value.mealPreference
+    }))
+
+    const seatNumbers=this.passengers.controls.map(
+        passenger=>passenger.value.seatNumber
+    );
+
     const bookingRequest: BookingRequest = {
       name: this.bookingForm.value.name,
       email: this.bookingForm.value.email,
-      numberOfSeats: 1,
-      passengers: [
-        {
-          name: this.bookingForm.value.passengerName,
-          gender: this.bookingForm.value.gender,
-          age: this.bookingForm.value.age,
-          mealPreference: this.bookingForm.value.mealPreference
-        }
-      ],
-      seatNumbers: [this.bookingForm.value.seatNumber]
+      numberOfSeats: this.passengers.length,
+      passengers: passengerData,
+      seatNumbers: seatNumbers
     };
 
     console.log('Sending booking:', bookingRequest);

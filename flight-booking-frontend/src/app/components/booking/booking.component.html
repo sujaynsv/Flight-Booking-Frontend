@@ -11,21 +11,60 @@
       <h3>Contact Info</h3>
       <input type="text" formControlName="name" placeholder="Your Name" />
       <input type="email" formControlName="email" placeholder="Email" />
-      <h3>Passenger Details</h3>
-      <input type="text" formControlName="passengerName" placeholder="Passenger Name" />
 
-      <select formControlName="gender">
-        <option value="MALE">MALE</option>
-        <option value="FEMALE">FEMALE</option>
-      </select>
+      <div formArrayName="passengers">
+        <h3>
+            Passenger Details ({{passengers.length}} passenger{{passengers.length>1 ? 's': ''}})
+        </h3>
+        
+        <div *ngFor="let passenger of passengers.controls; let i=index"
+             [formGroupName]="i"
+             class="passenger-section">
+
+            <h4>
+                Passenger {{i+1}}
+                <button type="button"
+                        (click)="removePassenger(i)"
+                        *ngIf="passengers.length>1"
+                        class="remove-btn">
+                  Remove
+                </button>
+            </h4>
+
+            <input type="text"
+                   formControlName="passengerName"
+                   placeholder="Name" />
+
+            <select formControlName="gender">
+              <option value="MALE">MALE</option>
+              <option value="FEMALE">FEMALE</option>
+            </select>
+
+            <input type="number"
+                   formControlName="age"
+                   placeholder="Age"
+                   min="1" />
+
+            <select formControlName="mealPreference">
+              <option value="VEG">VEG</option>
+              <option value="NON_VEG">NON_VEG</option>
+            </select>
+
+            <input type="text"
+                   formControlName="seatNumber" 
+                   placeholder="Seat Eg. A1" />
+
+        </div>
+      </div>
+
+      <button type="button" 
+              (click)="addPassenger()" 
+              class="add-passenger-btn">
+        Add another Passenger
+      </button>
+
+      <div *ngIf="error" class="error">{{error}}</div>
       
-      <input type="number" formControlName="age" placeholder="Age" min="1" />
-      <select formControlName="mealPreference">
-        <option value="VEG">VEG</option>
-        <option value="NON_VEG">NON_VEG</option>
-      </select>
-      <input type="text" formControlName="seatNumber" placeholder="A1" />
-      <div *ngIf="error" class="error">{{ error }}</div>
       <div class="buttons">
         <button type="button" (click)="cancel()">Cancel</button>
         <button type="submit">
