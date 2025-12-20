@@ -1,49 +1,68 @@
 <div class="tickets-container">
   <h1>My Bookings</h1>
-  <p *ngIf="userEmail">Email: {{ userEmail }}</p>
+  <p *ngIf="userEmail" class="email-info">Email: {{ userEmail }}</p>
 
-  <p *ngIf="loading">Loading...</p>
-  <p *ngIf="error">{{ error }}</p>
+  <p *ngIf="loading" class="loading-message">Loading...</p>
+  <p *ngIf="error" class="error-message">{{ error }}</p>
 
   <div *ngIf="!loading">
-    <div *ngFor="let booking of bookings">
-      <hr>
+    <p *ngIf="bookings.length === 0" class="no-bookings">No bookings found</p>
 
-      <h3>PNR: {{ booking.pnr }}</h3>
-      <p>Status: {{ booking.status }}</p>
-      <p>Name: {{ booking.name }}</p>
-      <p>Email: {{ booking.email }}</p>
-      <p>Seats: {{ booking.numberOfSeats }}</p>
-      <p>Seat Numbers: {{ booking.seatNumbers.join(', ') }}</p>
-      <p>Date: {{ booking.journeyDate }}</p>
-
-      <div *ngFor="let passenger of booking.passengers; let i = index">
-        <p>{{ i + 1 }}. {{ passenger.name }} - {{ passenger.age }}, {{ passenger.gender }}, {{ passenger.mealPreference }}</p>
+    <div *ngFor="let booking of bookings" class="booking-card">
+      
+      <div class="booking-header">
+        <h3>PNR: {{ booking.pnr }}</h3>
+        <span class="status-badge" 
+              [ngClass]="booking.status === 'CONFIRMED' ? 'confirmed' : 'cancelled'">
+          {{ booking.status }}
+        </span>
       </div>
 
-      <button
-        *ngIf="booking.status === 'CONFIRMED'"
-        (click)="askCancelConfirmation(booking.pnr)">
-        Cancel
+      <div class="booking-details">
+        <p><strong>Name:</strong> {{ booking.name }}</p>
+        <p><strong>Email:</strong> {{ booking.email }}</p>
+        <p><strong>Seats:</strong> {{ booking.numberOfSeats }}</p>
+        <p><strong>Seat Numbers:</strong> {{ booking.seatNumbers.join(', ') }}</p>
+        <p><strong>Journey Date:</strong> {{ booking.journeyDate }}</p>
+      </div>
+
+      <div class="passengers-section">
+        <strong>Passengers:</strong>
+        <div *ngFor="let passenger of booking.passengers; let i = index" class="passenger-item">
+          <span class="passenger-name">{{ i + 1 }}. {{ passenger.name }}</span>
+          <span class="passenger-info">
+            {{ passenger.age }}y, {{ passenger.gender }}, {{ passenger.mealPreference }}
+          </span>
+        </div>
+      </div>
+
+      <button *ngIf="booking.status === 'CONFIRMED' && confirmingPnr !== booking.pnr"
+              (click)="askCancelConfirmation(booking.pnr)"
+              class="btn-cancel">
+        Cancel Booking
       </button>
 
-      <div *ngIf="confirmingPnr === booking.pnr">
-        <h3>Confirm Cancellation</h3>
-        <p>Are you sure you want to cancel booking? <strong>{{ booking.pnr }}</strong></p>
-
-        <button
-          (click)="confirmCancellation(booking.pnr)"
-          [disabled]="cancellingPnr === booking.pnr">
+      <div *ngIf="confirmingPnr === booking.pnr" class="confirmation-dialog">
+        <h4>Confirm Cancellation</h4>
+        <p>Are you sure you want to cancel booking <strong>{{ booking.pnr }}</strong>?</p>
+        
+        <button (click)="confirmCancellation(booking.pnr)"
+                [disabled]="cancellingPnr === booking.pnr"
+                class="btn-confirm-yes">
           {{ cancellingPnr === booking.pnr ? 'Cancelling...' : 'Yes, Cancel' }}
         </button>
-
-        <button (click)="closeCancelConfirm()">No, Keep Booking</button>
+        
+        <button (click)="closeCancelConfirm()"
+                [disabled]="cancellingPnr === booking.pnr"
+                class="btn-confirm-no">
+          No, Keep Booking
+        </button>
       </div>
     </div>
 
-    <div *ngIf="errorFlagFromCancelBooking">
+    <div *ngIf="errorFlagFromCancelBooking" class="cancel-error">
       <p>{{ errorMessage }}</p>
-      <button (click)="clearCancelError()">Dismiss</button>
+      <button (click)="clearCancelError()" class="btn-dismiss">Dismiss</button>
     </div>
   </div>
 </div>

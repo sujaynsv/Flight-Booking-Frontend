@@ -9,6 +9,7 @@ import { Booking } from '../../models/booking.model';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './tickets.components.html',
+  styleUrls: ['./ticket.component.css']
 })
 export class TicketsComponent implements OnInit {
   bookings: Booking[] = [];
@@ -38,21 +39,26 @@ export class TicketsComponent implements OnInit {
     }
   }
 
-  loadBookingHistory(): void {
-    this.loading = true;
-    this.bookingService.getBookingHistory(this.userEmail).subscribe({
-      next: (bookings) => {
-        this.bookings = bookings;
-        this.loading = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.error = 'Failed to load booking history';
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
+loadBookingHistory(): void {
+  this.loading = true;
+  this.bookingService.getBookingHistory(this.userEmail).subscribe({
+    next: (bookings) => {
+      this.bookings = bookings.sort((a, b) => {
+        if (a.status === 'CONFIRMED' && b.status !== 'CONFIRMED') return -1;
+        if (a.status !== 'CONFIRMED' && b.status === 'CONFIRMED') return 1;
+        return 0;
+      });
+      this.loading = false;
+      this.cdr.detectChanges();
+    },
+    error: () => {
+      this.error = 'Failed to load booking history';
+      this.loading = false;
+      this.cdr.detectChanges();
+    }
+  });
+}
+
 
   askCancelConfirmation(pnr: string): void {
     this.confirmingPnr = pnr;
@@ -82,7 +88,7 @@ export class TicketsComponent implements OnInit {
         this.loadBookingHistory();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message;
+        this.errorMessage = err.error.message;
         this.errorFlagFromCancelBooking = true;
         this.cancellingPnr = null;
         this.confirmingPnr = null;
