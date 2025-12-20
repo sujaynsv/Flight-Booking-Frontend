@@ -22,7 +22,7 @@ export interface Booking{
     email: string;
     numberOfSeats: number;
     seatNumbers: string[];
-    bookingDate: string;
+    journeyDate: string;
     passengers: Passenger[];
     status?: string;
     totalAmount: number;

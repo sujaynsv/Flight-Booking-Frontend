@@ -2,27 +2,48 @@
   <h1>My Bookings</h1>
   <p *ngIf="userEmail">Email: {{ userEmail }}</p>
 
-  <p *ngIf="loading">Loading is true in html.</p>
+  <p *ngIf="loading">Loading...</p>
   <p *ngIf="error">{{ error }}</p>
 
-<div *ngIf="loading===false">
-  <div *ngFor="let booking of bookings">
-    <hr>
-    <h3>PNR: {{ booking.pnr }}</h3>
-    <p>Status: {{ booking.status }}</p>
-    <p>Name: {{ booking.name }}</p>
-    <p>Email: {{ booking.email }}</p>
-    <p>Seats: {{ booking.numberOfSeats }}</p>
-    <p>Seat Numbers: {{ booking.seatNumbers.join(', ') }}</p>
-    <p>Date: {{ booking.bookingDate | date:'short' }}</p>
-    
-    <div *ngFor="let passenger of booking.passengers; let i = index">
-      <p>{{ i + 1 }}. {{ passenger.name }} - {{ passenger.age }}, {{ passenger.gender }}, {{ passenger.mealPreference }}</p>
+  <div *ngIf="!loading">
+    <div *ngFor="let booking of bookings">
+      <hr>
+
+      <h3>PNR: {{ booking.pnr }}</h3>
+      <p>Status: {{ booking.status }}</p>
+      <p>Name: {{ booking.name }}</p>
+      <p>Email: {{ booking.email }}</p>
+      <p>Seats: {{ booking.numberOfSeats }}</p>
+      <p>Seat Numbers: {{ booking.seatNumbers.join(', ') }}</p>
+      <p>Date: {{ booking.journeyDate }}</p>
+
+      <div *ngFor="let passenger of booking.passengers; let i = index">
+        <p>{{ i + 1 }}. {{ passenger.name }} - {{ passenger.age }}, {{ passenger.gender }}, {{ passenger.mealPreference }}</p>
+      </div>
+
+      <button
+        *ngIf="booking.status === 'CONFIRMED'"
+        (click)="askCancelConfirmation(booking.pnr)">
+        Cancel
+      </button>
+
+      <div *ngIf="confirmingPnr === booking.pnr">
+        <h3>Confirm Cancellation</h3>
+        <p>Are you sure you want to cancel booking? <strong>{{ booking.pnr }}</strong></p>
+
+        <button
+          (click)="confirmCancellation(booking.pnr)"
+          [disabled]="cancellingPnr === booking.pnr">
+          {{ cancellingPnr === booking.pnr ? 'Cancelling...' : 'Yes, Cancel' }}
+        </button>
+
+        <button (click)="closeCancelConfirm()">No, Keep Booking</button>
+      </div>
     </div>
-    
-    <button *ngIf="booking.status === 'CONFIRMED'" (click)="cancelBooking(booking.pnr)">
-      Cancel
-    </button>
+
+    <div *ngIf="errorFlagFromCancelBooking">
+      <p>{{ errorMessage }}</p>
+      <button (click)="clearCancelError()">Dismiss</button>
+    </div>
   </div>
-</div>
 </div>
