@@ -22,7 +22,7 @@ export class ProfileComponent implements OnInit {
   error: string | null = null;
   success: string | null = null;
 
-  showPasswordForm = false;   // ← toggle
+  showPasswordForm = false; 
 
   ngOnInit(): void {
     this.passwordForm = this.fb.group({
@@ -63,7 +63,7 @@ export class ProfileComponent implements OnInit {
         this.loading = false;
         this.success = 'Password changed successfully!';
         this.passwordForm.reset();
-        this.showPasswordForm = false;  // hide after success
+        this.showPasswordForm = false;
       },
       error: (error) => {
         this.loading = false;

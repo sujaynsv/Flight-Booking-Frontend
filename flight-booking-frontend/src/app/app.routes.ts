@@ -12,20 +12,20 @@ import { AdminHomeComponent } from './components/admin-home/admin-home.component
 import { HomeComponent } from './components/home/home.component';
 
 export const routes: Routes = [
-  // Public landing route
+
   {
     path: '',
     component: HomeComponent,
     pathMatch: 'full'
   },
 
-  // Public auth route
+
   {
     path: 'login',
     component: AuthComponent
   },
 
-  // Profile (both roles)
+
   {
     path: 'profile',
     component: ProfileComponent,
@@ -33,7 +33,7 @@ export const routes: Routes = [
     data: { roles: ['ADMIN', 'USER'] }
   },
 
-  // Admin dashboard
+
   {
     path: 'admin',
     component: AdminHomeComponent,
@@ -41,7 +41,7 @@ export const routes: Routes = [
     data: { roles: ['ADMIN'] }
   },
 
-  // Passenger-only routes
+
   {
     path: 'search',
     component: SearchComponent,
@@ -61,7 +61,7 @@ export const routes: Routes = [
     data: { roles: ['USER'] }
   },
 
-  // Admin-only routes
+
   {
     path: 'airlines',
     component: AirlineComponent,
@@ -75,7 +75,7 @@ export const routes: Routes = [
     data: { roles: ['ADMIN'] }
   },
 
-  // Fallback: unknown paths → home
+
   {
     path: '**',
     redirectTo: '',

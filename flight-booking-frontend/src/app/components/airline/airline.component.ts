@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';  // ✅ Already imported
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';  //   Already imported
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -30,7 +30,7 @@ export class AirlineComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private cdr: ChangeDetectorRef  // ✅ ADD THIS
+    private cdr: ChangeDetectorRef 
   ) {}
 
   ngOnInit(): void {
@@ -47,20 +47,20 @@ export class AirlineComponent implements OnInit {
   loadAirlines(): void {
     this.loading = true;
     this.error = null;
-    this.cdr.detectChanges();  // ✅ FORCE CHANGE DETECTION
+    this.cdr.detectChanges(); 
 
     this.http.get<Airline[]>(this.apiUrl, { withCredentials: true }).subscribe({
       next: (data) => {
         console.log('Airlines loaded', data);
         this.airlines = data;
         this.loading = false;
-        this.cdr.detectChanges();  // ✅ FORCE UPDATE UI
+        this.cdr.detectChanges(); 
       },
       error: (err) => {
         console.error('Failed to load airlines', err);
         this.error = 'Failed to load airlines';
         this.loading = false;
-        this.cdr.detectChanges();  // ✅ FORCE UPDATE UI
+        this.cdr.detectChanges();  
       }
     });
   }
@@ -68,13 +68,13 @@ export class AirlineComponent implements OnInit {
   onSubmit(): void {
     if (this.airlineForm.invalid) {
       this.error = 'Please fill all fields correctly';
-      this.cdr.detectChanges();  // ✅ IMMEDIATE ERROR DISPLAY
+      this.cdr.detectChanges();  
       return;
     }
 
     this.error = null;
     this.successMessage = null;
-    this.cdr.detectChanges();  // ✅ CLEAR MESSAGES IMMEDIATELY
+    this.cdr.detectChanges(); 
 
     const body: Airline = this.airlineForm.value;
 
@@ -82,12 +82,12 @@ export class AirlineComponent implements OnInit {
       next: () => {
         this.successMessage = 'Airline created successfully';
         this.airlineForm.reset();
-        this.loadAirlines();  // Reload list
+        this.loadAirlines();  
       },
       error: (err) => {
         console.error('Failed to create airline', err);
         this.error = err.error?.error || 'Failed to create airline';
-        this.cdr.detectChanges();  // ✅ SHOW ERROR IMMEDIATELY
+        this.cdr.detectChanges();  
       }
     });
   }

@@ -37,7 +37,7 @@ export class AuthComponent implements OnInit {
       password: ['', [Validators.required, Validators.minLength(6)]],
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
-      role: ['', Validators.required]
+      role: ['USER', Validators.required]
     });
 
     this.authService.authCheckComplete$.pipe(
@@ -128,6 +128,7 @@ export class AuthComponent implements OnInit {
     this.error = null;
     this.loginForm.reset();
     this.registerForm.reset();
+    this.registerForm.patchValue({role: 'USER'});
     this.cdr.detectChanges();
   }
 }
