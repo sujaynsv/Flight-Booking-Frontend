@@ -1,21 +1,37 @@
 <nav class="navbar">
   <div class="navbar-brand">
-    <button routerLink="/search" class="booking-button">Flight Booking</button>
+    <!-- For admins, brand can go to /airlines; for users to /search -->
+    <button
+      *ngIf="(currentUser$ | async) as user"
+      [routerLink]="user.role === 'ADMIN' ? '/airlines' : '/search'"
+      class="booking-button">
+      Flight Booking
+    </button>
   </div>
-  
+
   <div class="navbar-content">
     <div *ngIf="(currentUser$ | async) as user" class="user-info">
-      <span class="user-name">Welcome, {{ user.firstname }} {{ user.lastname }}</span>
+      <span class="user-name">
+        Welcome, {{ user.firstName }} {{ user.lastName }}
+      </span>
+
+      <!-- Admin-only -->
+      <ng-container *ngIf="user.role === 'ADMIN'; else passengerMenu">
+        <button routerLink="/airlines">Manage Airlines</button>
+        <button routerLink="/inventory">Add Flight</button>
+      </ng-container>
+
+      <!-- Passenger-only -->
+      <ng-template #passengerMenu>
+        <button routerLink="/search">Search Flights</button>
+        <button routerLink="/tickets">My Bookings</button>
+      </ng-template>
+
       <button (click)="logout()" class="btn btn-logout">Logout</button>
     </div>
-    
+
     <div *ngIf="!(isLoggedIn$ | async)" class="user-info">
       <button routerLink="/login" class="btn btn-login">Login</button>
-    </div>
-
-    <div>
-
-      <button routerLink="/tickets">My Bookings</button>
     </div>
   </div>
 </nav>

@@ -35,69 +35,85 @@ export class AuthComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       firstName: ['', Validators.required],
-      lastName: ['', Validators.required]
+      lastName: ['', Validators.required],
+      role: ['', Validators.required]
     });
 
-    this.authService.authCheckComplete$.pipe(
-      filter(complete => complete),
-      take(1)
-    ).subscribe(() => {
-      if (this.authService.isLoggedIn()) {
-        console.log('User already logged in, redirecting to search');
+  this.authService.authCheckComplete$.pipe(
+    filter(complete => complete),
+    take(1)
+  ).subscribe(() => {
+    const user = this.authService.getCurrentUserValue();
+    if (user) {
+      if (user.role === 'ADMIN') {
+        this.router.navigate(['/airlines']);
+      } else {
         this.router.navigate(['/search']);
       }
-    });
-  }
-
-  onLogin(): void {
-    if (this.loginForm.invalid) {
-      this.error = 'Please fill in all fields correctly';
-      return;
     }
-
-    this.loading = true;
-    this.error = null;
-
-    const { email, password } = this.loginForm.value;
-
-    this.authService.login(email, password).subscribe({
-      next: (response) => {
-        console.log('Login successful', response);
-        this.loading = false;
-        this.router.navigate(['/search']);
-      },
-      error: (error) => {
-        console.error('Login error:', error);
-        this.error = error.message || 'Login failed. Please try again.';
-        this.loading = false;
-      }
-    });
+  });
   }
 
-  onRegister(): void {
-    if (this.registerForm.invalid) {
-      this.error = 'Please fill in all fields correctly';
-      return;
+onLogin(): void {
+  if (this.loginForm.invalid) {
+    this.error = 'Please fill in all fields correctly';
+    return;
+  }
+
+  this.loading = true;
+  this.error = null;
+
+  const { email, password } = this.loginForm.value;
+
+  this.authService.login(email, password).subscribe({
+    next: (user) => {   // user is AuthUser from service
+      console.log('Login successful', user);
+      this.loading = false;
+
+      if (user.role === 'ADMIN') {
+        this.router.navigate(['/airlines']);   // admin home
+      } else {
+        this.router.navigate(['/search']);     // passenger home
+      }
+    },
+    error: (error) => {
+      console.error('Login error:', error);
+      this.error = error.message || 'Login failed. Please try again.';
+      this.loading = false;
     }
+  });
+}
 
-    this.loading = true;
-    this.error = null;
-
-    const { email, password, firstName, lastName } = this.registerForm.value;
-
-    this.authService.register(email, password, firstName, lastName).subscribe({
-      next: (response) => {
-        console.log('Registration successful', response);
-        this.loading = false;
-        this.router.navigate(['/search']);
-      },
-      error: (error) => {
-        console.error('Registration error:', error);
-        this.error = error.message || 'Registration failed. Please try again.';
-        this.loading = false;
-      }
-    });
+onRegister(): void {
+  if (this.registerForm.invalid) {
+    this.error = 'Please fill in all fields correctly';
+    return;
   }
+
+  this.loading = true;
+  this.error = null;
+
+  const { email, password, firstName, lastName, role } = this.registerForm.value;
+
+  this.authService.register(email, password, firstName, lastName, role).subscribe({
+    next: (user) => {
+      console.log('Registration successful', user);
+      this.loading = false;
+
+      if (user.role === 'ADMIN') {
+        this.router.navigate(['/airlines']);
+      } else {
+        this.router.navigate(['/search']);
+      }
+    },
+    error: (error) => {
+      console.error('Registration error:', error);
+      this.error = error.message || 'Registration failed. Please try again.';
+      this.loading = false;
+    }
+  });
+}
+
 
   toggleRegister(): void {
     this.showRegister = !this.showRegister;

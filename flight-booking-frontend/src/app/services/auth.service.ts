@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+import { tap, catchError, map } from 'rxjs/operators';   // ← add map here
+import { AuthResponse, RegisterRequest } from '../models/auth.model';
 
 interface AuthUser {
   email: string;
-  firstname: string;
-  lastname: string;
+  firstName: string;
+  lastName: string;
   role?: string;
   message?: string;
 }
@@ -31,11 +32,18 @@ export class AuthService {
   }
 
   checkAuthStatus(): void {
-    this.http.get<AuthUser>(`${this.apiUrl}/me`, {
+    this.http.get<AuthResponse>(`${this.apiUrl}/me`, {
       withCredentials: true
     }).subscribe({
-      next: (user) => {
-        console.log('User already logged in:', user.email);
+      next: (res) => {
+        console.log('User already logged in response:', res);
+        const user: AuthUser = {
+          email: res.email,
+          firstName: res.firstname,
+          lastName: res.lastname,
+          role: res.role,
+          message: res.message
+        };
         this.currentUserSubject.next(user);
         this.isLoggedInSubject.next(true);
         this.authCheckComplete.next(true);
@@ -52,16 +60,30 @@ export class AuthService {
   login(email: string, password: string): Observable<AuthUser> {
     console.log('Logging in:', email);
     
-    return this.http.post<AuthUser>(
+    return this.http.post<AuthResponse>(
       `${this.apiUrl}/login`,
       { email, password },
       { withCredentials: true }
     ).pipe(
-      tap((response) => {
-        console.log('Login successful', response);
-        this.currentUserSubject.next(response);
+      tap((res) => {
+        console.log('Login successful', res);
+        const user: AuthUser = {
+          email: res.email,
+          firstName: res.firstname,
+          lastName: res.lastname,
+          role: res.role,
+          message: res.message
+        };
+        this.currentUserSubject.next(user);
         this.isLoggedInSubject.next(true);
       }),
+      map((res): AuthUser => ({
+        email: res.email,
+        firstName: res.firstname,
+        lastName: res.lastname,
+        role: res.role,
+        message: res.message
+      })),
       catchError((error) => {
         console.error('Login failed:', error);
         const errorMessage = error?.error?.message || 'Login failed';
@@ -70,19 +92,41 @@ export class AuthService {
     );
   }
 
-  register(email: string, password: string, firstName: string, lastName: string): Observable<AuthUser> {
+  register(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    role: string
+  ): Observable<AuthUser> {
     console.log('Registering:', email);
-    
-    return this.http.post<AuthUser>(
+
+    const body: RegisterRequest = { email, password, firstName, lastName, role };
+
+    return this.http.post<AuthResponse>(
       `${this.apiUrl}/register`,
-      { email, password, firstName, lastName },
+      body,
       { withCredentials: true }
     ).pipe(
-      tap((response) => {
-        console.log('Registration successful', response);
-        this.currentUserSubject.next(response);
+      tap((res) => {
+        const user: AuthUser = {
+          email: res.email,
+          firstName: res.firstname,
+          lastName: res.lastname,
+          role: res.role,
+          message: res.message
+        };
+        console.log('Registration successful', user);
+        this.currentUserSubject.next(user);
         this.isLoggedInSubject.next(true);
       }),
+      map((res): AuthUser => ({
+        email: res.email,
+        firstName: res.firstname,
+        lastName: res.lastname,
+        role: res.role,
+        message: res.message
+      })),
       catchError((error) => {
         console.error('Registration failed:', error);
         const errorMessage = error?.error?.message || 'Registration failed';
@@ -117,7 +161,7 @@ export class AuthService {
     return this.currentUser$;
   }
 
-  getCurrentUserValue(): AuthUser | null{
+  getCurrentUserValue(): AuthUser | null {
     return this.currentUserSubject.value;
   }
 
