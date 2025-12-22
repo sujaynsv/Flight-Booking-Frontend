@@ -1,0 +1,65 @@
+<div class="profile-container">
+  <div class="profile-card">
+    <h2>My Profile</h2>
+    
+    <!-- User Info -->
+    <div class="user-info-section" *ngIf="user$ | async as user">
+      <div class="info-row">
+        <label>Email:</label>
+        <span>{{ user.email }}</span>
+      </div>
+      <div class="info-row">
+        <label>First Name:</label>
+        <span>{{ user.firstName }}</span>
+      </div>
+      <div class="info-row">
+        <label>Last Name:</label>
+        <span>{{ user.lastName }}</span>
+      </div>
+      <div class="info-row">
+        <label>Role:</label>
+        <span class="role-badge" [class.admin]="user.role === 'ADMIN'">
+          {{ user.role }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Password Change Form -->
+    <div class="password-section">
+      <h3>Change Password</h3>
+      
+      <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+        <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" formControlName="currentPassword" required>
+          <div class="error" *ngIf="passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched">
+            Current password is required
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" formControlName="newPassword" required>
+          <div class="error" *ngIf="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched">
+            Password must be at least 6 characters
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Confirm New Password</label>
+          <input type="password" formControlName="confirmPassword" required>
+          <div class="error" *ngIf="passwordForm.get('confirmPassword')?.invalid && passwordForm.get('confirmPassword')?.touched">
+            Passwords must match
+          </div>
+        </div>
+
+        <div *ngIf="error" class="error-message">{{ error }}</div>
+        <div *ngIf="success" class="success-message">{{ success }}</div>
+
+        <button type="submit" [disabled]="loading || passwordForm.invalid" class="btn-primary">
+          {{ loading ? 'Changing...' : 'Change Password' }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

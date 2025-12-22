@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { tap, catchError, map } from 'rxjs/operators';   // ← add map here
+import { tap, catchError, map, switchMap } from 'rxjs/operators';   // ← add map here
 import { AuthResponse, RegisterRequest } from '../models/auth.model';
 
 interface AuthUser {
@@ -168,4 +168,25 @@ export class AuthService {
   isLoggedIn(): boolean {
     return this.isLoggedInSubject.value;
   }
+
+changePassword(currentPassword: string, newPassword: string): Observable<any> {
+  return this.http.patch<any>(
+    `${this.apiUrl}/password`,
+    { currentPassword, newPassword },
+    { withCredentials: true }
+  ).pipe(
+    map((response: any) => {
+      console.log('Password changed successfully:', response.message);
+      return response;
+    }),
+    catchError((error) => {
+      console.error('Password change failed:', error);
+      const errorMessage = error?.error?.message || 'Password change failed';
+      return throwError(() => new Error(errorMessage));
+    })
+  );
 }
+
+
+}
+

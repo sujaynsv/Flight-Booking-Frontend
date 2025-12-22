@@ -15,6 +15,10 @@
         Welcome, {{ user.firstName }} {{ user.lastName }}
       </span>
 
+        <button routerLink="/profile" class="btn btn-profile" title="Profile">
+          <i class="user-icon"></i> Profile
+        </button>
+
       <!-- Admin-only -->
       <ng-container *ngIf="user.role === 'ADMIN'; else passengerMenu">
         <button routerLink="/airlines">Manage Airlines</button>
