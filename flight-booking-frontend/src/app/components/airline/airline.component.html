@@ -1,49 +1,53 @@
-<div>
-  <h1>Manage Airlines</h1>
+<div class="manage-airlines-layout">
+  <!-- Left: smaller form card -->
+  <div class="card form-card">
+    <h1>Manage Airlines</h1>
 
-  <div *ngIf="error" style="color: red; margin-bottom: 10px;">
-    {{ error }}
+    <div *ngIf="error" class="error-message">{{ error }}</div>
+    <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+
+    <form [formGroup]="airlineForm" (ngSubmit)="onSubmit()">
+      <h3>Add Airline</h3>
+
+      <div>
+        <label>Airline Name</label>
+        <input type="text" formControlName="airlineName" />
+      </div>
+
+      <div>
+        <label>Airline Code</label>
+        <input type="text" formControlName="airlineCode" />
+      </div>
+
+      <div>
+        <label>Contact Email</label>
+        <input type="email" formControlName="contactEmail" />
+      </div>
+
+      <div>
+        <label>Contact Phone</label>
+        <input type="text" formControlName="contactPhone" />
+      </div>
+
+      <button type="submit">Create Airline</button>
+    </form>
   </div>
-  <div *ngIf="successMessage" style="color: green; margin-bottom: 10px;">
-    {{ successMessage }}
+
+  <!-- Right: wider list card -->
+  <div class="card airlines-list-card">
+    <h3>Existing Airlines</h3>
+    <p *ngIf="loading" class="loading-text">Loading airlines...</p>
+    <p *ngIf="!loading && airlines.length === 0" class="empty-text">No airlines found.</p>
+
+    <ul *ngIf="!loading && airlines.length > 0" class="airlines-list">
+      <li *ngFor="let airline of airlines">
+        <div class="airline-name-code">
+          {{ airline.airlineName }} ({{ airline.airlineCode }})
+        </div>
+        <div class="airline-contact">
+          {{ airline.contactEmail }} · {{ airline.contactPhone }}
+        </div>
+      </li>
+    </ul>
   </div>
-
-  <form [formGroup]="airlineForm" (ngSubmit)="onSubmit()">
-    <h3>Add Airline</h3>
-
-    <div>
-      <label>Airline Name</label><br />
-      <input type="text" formControlName="airlineName" />
-    </div>
-
-    <div>
-      <label>Airline Code</label><br />
-      <input type="text" formControlName="airlineCode" />
-    </div>
-
-    <div>
-      <label>Contact Email</label><br />
-      <input type="email" formControlName="contactEmail" />
-    </div>
-
-    <div>
-      <label>Contact Phone</label><br />
-      <input type="text" formControlName="contactPhone" />
-    </div>
-
-    <button type="submit">Create Airline</button>
-  </form>
-
-  <hr />
-
-  <h3>Existing Airlines</h3>
-  <p *ngIf="loading">Loading airlines...</p>
-  <p *ngIf="!loading && airlines.length === 0">No airlines found.</p>
-
-  <ul *ngIf="!loading && airlines.length > 0">
-    <li *ngFor="let airline of airlines">
-      {{ airline.airlineName }} ({{ airline.airlineCode }}) - 
-      {{ airline.contactEmail }} / {{ airline.contactPhone }}
-    </li>
-  </ul>
 </div>

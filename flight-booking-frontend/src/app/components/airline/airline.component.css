@@ -1,0 +1,90 @@
+:host {
+  display: block;
+  padding: 16px 24px;
+  background: #f3f4f6;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Two cards layout */
+.manage-airlines-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); /* left smaller, right wider */
+  gap: 20px;
+  align-items: stretch;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Generic card */
+.card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 18px 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Left form card slightly shorter vertically */
+.form-card {
+  min-height: 0;           /* prevent forced stretching */
+}
+
+/* Right list card fills remaining height and scrolls inside */
+.airlines-list-card {
+  min-height: 0;
+}
+
+.airlines-list {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  max-height: calc(100vh - 220px); /* use viewport height, avoid inner scroll bar too long */
+}
+
+/* Airline items as compact cards */
+.airlines-list li {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+/* Form fields compact */
+form div {
+  margin-bottom: 10px;
+}
+
+input[type="text"],
+input[type="email"] {
+  width: 60%;
+  padding: 7px 3px;
+  margin-left: 9px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 13px;
+}
+
+/* Create button aligned left but not huge */
+button[type="submit"] {
+  margin-top: 6px;
+  padding: 8px 16px;
+  align-items: center;
+  border-radius: 999px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+  
+@media (max-width: 900px) {
+  .manage-airlines-layout {
+    grid-template-columns: minmax(0, 1fr); /* stack on small screens */
+  }
+}

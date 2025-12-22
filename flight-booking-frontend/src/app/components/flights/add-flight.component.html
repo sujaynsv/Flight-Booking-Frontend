@@ -1,78 +1,77 @@
-<div>
+<div class="flight-form-card">
   <h1>Add Flight Inventory</h1>
 
-  <div *ngIf="error" style="color: red; margin-bottom: 10px;">
-    {{ error }}
-  </div>
-  <div *ngIf="successMessage" style="color: green; margin-bottom: 10px;">
-    {{ successMessage }}
-  </div>
-
-  <p *ngIf="loadingAirlines">Loading airlines...</p>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+  <div *ngIf="successMessage" class="success-message">{{ successMessage }}</div>
+  <p *ngIf="loadingAirlines" class="loading-airlines">Loading airlines...</p>
 
   <form [formGroup]="flightForm" (ngSubmit)="onSubmit()">
     <h3>Flight Details</h3>
 
-    <div>
-      <label>Airline</label><br />
-      <select formControlName="airlineId">
-        <option value="">-- Select Airline --</option>
-        <option *ngFor="let a of airlines" [value]="a.id">
-          {{ a.airlineName }} ({{ a.airlineCode }})
-        </option>
-      </select>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Airline</label>
+        <select formControlName="airlineId">
+          <option value="">-- Select Airline --</option>
+          <option *ngFor="let a of airlines" [value]="a.id">
+            {{ a.airlineName }} ({{ a.airlineCode }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Flight Number</label>
+        <input type="text" formControlName="flightNumber" />
+      </div>
+
+      <div class="form-group">
+        <label>From</label>
+        <input type="text" formControlName="fromPlace" />
+      </div>
+
+      <div class="form-group">
+        <label>To</label>
+        <input type="text" formControlName="toPlace" />
+      </div>
+
+      <div class="form-group">
+        <label>Departure DateTime</label>
+        <input type="datetime-local" formControlName="departureDateTime" />
+      </div>
+
+      <div class="form-group">
+        <label>Arrival DateTime</label>
+        <input type="datetime-local" formControlName="arrivalDateTime" />
+      </div>
+
+      <div class="form-group">
+        <label>Price</label>
+        <input type="number" formControlName="price" />
+      </div>
+
+      <div class="form-group">
+        <label>Total Seats</label>
+        <input type="number" formControlName="totalSeats" />
+      </div>
+
+      <div class="form-group">
+        <label>Available Seats</label>
+        <input type="number" formControlName="availableSeats" />
+      </div>
+
+      <div class="form-group">
+        <label>Trip Type</label>
+        <select formControlName="tripType">
+          <option value="ONE_WAY">ONE_WAY</option>
+          <option value="ROUND_TRIP">ROUND_TRIP</option>
+        </select>
+      </div>
     </div>
 
-    <div>
-      <label>Flight Number</label><br />
-      <input type="text" formControlName="flightNumber" />
+    <div class="form-actions">
+      <button type="submit" [disabled]="submitting || flightForm.invalid">
+        {{ submitting ? 'Creating...' : 'Create Flight' }}
+      </button>
     </div>
-
-    <div>
-      <label>From</label><br />
-      <input type="text" formControlName="fromPlace" />
-    </div>
-
-    <div>
-      <label>To</label><br />
-      <input type="text" formControlName="toPlace" />
-    </div>
-
-    <div>
-      <label>Departure DateTime</label><br />
-      <input type="datetime-local" formControlName="departureDateTime" />
-    </div>
-
-    <div>
-      <label>Arrival DateTime</label><br />
-      <input type="datetime-local" formControlName="arrivalDateTime" />
-    </div>
-
-    <div>
-      <label>Price</label><br />
-      <input type="number" formControlName="price" />
-    </div>
-
-    <div>
-      <label>Total Seats</label><br />
-      <input type="number" formControlName="totalSeats" />
-    </div>
-
-    <div>
-      <label>Available Seats</label><br />
-      <input type="number" formControlName="availableSeats" />
-    </div>
-
-    <div>
-      <label>Trip Type</label><br />
-      <select formControlName="tripType">
-        <option value="ONE_WAY">ONE_WAY</option>
-        <option value="ROUND_TRIP">ROUND_TRIP</option>
-      </select>
-    </div>
-
-    <button type="submit" [disabled]="submitting">
-      {{ submitting ? 'Creating...' : 'Create Flight' }}
-    </button>
   </form>
 </div>

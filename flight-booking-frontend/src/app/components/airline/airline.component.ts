@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';  // ✅ Already imported
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -15,7 +15,8 @@ interface Airline {
   selector: 'app-airline',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './airline.component.html'
+  templateUrl: './airline.component.html',
+  styleUrls: ['./airline.component.css']
 })
 export class AirlineComponent implements OnInit {
   airlineForm!: FormGroup;
@@ -29,6 +30,7 @@ export class AirlineComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
+    private cdr: ChangeDetectorRef  // ✅ ADD THIS
   ) {}
 
   ngOnInit(): void {
@@ -45,17 +47,20 @@ export class AirlineComponent implements OnInit {
   loadAirlines(): void {
     this.loading = true;
     this.error = null;
+    this.cdr.detectChanges();  // ✅ FORCE CHANGE DETECTION
 
     this.http.get<Airline[]>(this.apiUrl, { withCredentials: true }).subscribe({
       next: (data) => {
         console.log('Airlines loaded', data);
         this.airlines = data;
-        this.loading = false;        // <- make sure this is here
+        this.loading = false;
+        this.cdr.detectChanges();  // ✅ FORCE UPDATE UI
       },
       error: (err) => {
         console.error('Failed to load airlines', err);
         this.error = 'Failed to load airlines';
-        this.loading = false;        // <- and here
+        this.loading = false;
+        this.cdr.detectChanges();  // ✅ FORCE UPDATE UI
       }
     });
   }
@@ -63,11 +68,13 @@ export class AirlineComponent implements OnInit {
   onSubmit(): void {
     if (this.airlineForm.invalid) {
       this.error = 'Please fill all fields correctly';
+      this.cdr.detectChanges();  // ✅ IMMEDIATE ERROR DISPLAY
       return;
     }
 
     this.error = null;
     this.successMessage = null;
+    this.cdr.detectChanges();  // ✅ CLEAR MESSAGES IMMEDIATELY
 
     const body: Airline = this.airlineForm.value;
 
@@ -75,11 +82,12 @@ export class AirlineComponent implements OnInit {
       next: () => {
         this.successMessage = 'Airline created successfully';
         this.airlineForm.reset();
-        this.loadAirlines();   // reload list
+        this.loadAirlines();  // Reload list
       },
       error: (err) => {
         console.error('Failed to create airline', err);
         this.error = err.error?.error || 'Failed to create airline';
+        this.cdr.detectChanges();  // ✅ SHOW ERROR IMMEDIATELY
       }
     });
   }

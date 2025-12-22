@@ -8,20 +8,37 @@ import { AddFlightComponent } from './components/flights/add-flight.component';
 import { AirlineComponent } from './components/airline/airline.component';
 import { RoleGuard } from './guards/role.guard';
 import { ProfileComponent } from './components/profile/profile.component';
+import { AdminHomeComponent } from './components/admin-home/admin-home.component';
+import { HomeComponent } from './components/home/home.component';
 
 export const routes: Routes = [
-
+  // Public landing route
   {
-  path: 'profile',
-  component: ProfileComponent,
-  canActivate: [AuthGuard, RoleGuard],
-  data: { roles: ['ADMIN', 'USER'] }
-},
+    path: '',
+    component: HomeComponent,
+    pathMatch: 'full'
+  },
 
   // Public auth route
   {
     path: 'login',
     component: AuthComponent
+  },
+
+  // Profile (both roles)
+  {
+    path: 'profile',
+    component: ProfileComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN', 'USER'] }
+  },
+
+  // Admin dashboard
+  {
+    path: 'admin',
+    component: AdminHomeComponent,
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['ADMIN'] }
   },
 
   // Passenger-only routes
@@ -58,16 +75,10 @@ export const routes: Routes = [
     data: { roles: ['ADMIN'] }
   },
 
-  // Default route for unauthenticated users (will be overridden by guards for logged-in users)
-  {
-    path: '',
-    redirectTo: '/search',
-    pathMatch: 'full'
-  },
-
-  // Fallback
+  // Fallback: unknown paths → home
   {
     path: '**',
-    redirectTo: '/search'
+    redirectTo: '',
+    pathMatch: 'full'
   }
 ];

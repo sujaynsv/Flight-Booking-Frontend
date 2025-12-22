@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -22,7 +22,8 @@ export class AuthComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -39,86 +40,94 @@ export class AuthComponent implements OnInit {
       role: ['', Validators.required]
     });
 
-  this.authService.authCheckComplete$.pipe(
-    filter(complete => complete),
-    take(1)
-  ).subscribe(() => {
-    const user = this.authService.getCurrentUserValue();
-    if (user) {
-      if (user.role === 'ADMIN') {
-        this.router.navigate(['/airlines']);
-      } else {
-        this.router.navigate(['/search']);
+    this.authService.authCheckComplete$.pipe(
+      filter(complete => complete),
+      take(1)
+    ).subscribe(() => {
+      const user = this.authService.getCurrentUserValue();
+      if (user) {
+        if (user.role === 'ADMIN') {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/search']);
+        }
       }
-    }
-  });
+    });
   }
 
-onLogin(): void {
-  if (this.loginForm.invalid) {
-    this.error = 'Please fill in all fields correctly';
-    return;
+  onLogin(): void {
+    if (this.loginForm.invalid) {
+      this.error = 'Please fill in all fields correctly';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.loading = true;
+    this.error = null;
+    this.cdr.detectChanges();
+
+    const { email, password } = this.loginForm.value;
+
+    this.authService.login(email, password).subscribe({
+      next: (user) => {
+        console.log('Login successful', user);
+        this.loading = false;
+        this.cdr.detectChanges();
+
+        if (user.role === 'ADMIN') {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/search']);
+        }
+      },
+      error: (error) => {
+        console.error('Login error:', error);
+        this.error = error.message || 'Login failed. Please try again.';
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
-  this.loading = true;
-  this.error = null;
-
-  const { email, password } = this.loginForm.value;
-
-  this.authService.login(email, password).subscribe({
-    next: (user) => {   // user is AuthUser from service
-      console.log('Login successful', user);
-      this.loading = false;
-
-      if (user.role === 'ADMIN') {
-        this.router.navigate(['/airlines']);   // admin home
-      } else {
-        this.router.navigate(['/search']);     // passenger home
-      }
-    },
-    error: (error) => {
-      console.error('Login error:', error);
-      this.error = error.message || 'Login failed. Please try again.';
-      this.loading = false;
+  onRegister(): void {
+    if (this.registerForm.invalid) {
+      this.error = 'Please fill in all fields correctly';
+      this.cdr.detectChanges();
+      return;
     }
-  });
-}
 
-onRegister(): void {
-  if (this.registerForm.invalid) {
-    this.error = 'Please fill in all fields correctly';
-    return;
+    this.loading = true;
+    this.error = null;
+    this.cdr.detectChanges();
+
+    const { email, password, firstName, lastName, role } = this.registerForm.value;
+
+    this.authService.register(email, password, firstName, lastName, role).subscribe({
+      next: (user) => {
+        console.log('Registration successful', user);
+        this.loading = false;
+        this.cdr.detectChanges();
+
+        if (user.role === 'ADMIN') {
+          this.router.navigate(['/admin']);
+        } else {
+          this.router.navigate(['/search']);
+        }
+      },
+      error: (error) => {
+        console.error('Registration error:', error);
+        this.error = error.message || 'Registration failed. Please try again.';
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
-
-  this.loading = true;
-  this.error = null;
-
-  const { email, password, firstName, lastName, role } = this.registerForm.value;
-
-  this.authService.register(email, password, firstName, lastName, role).subscribe({
-    next: (user) => {
-      console.log('Registration successful', user);
-      this.loading = false;
-
-      if (user.role === 'ADMIN') {
-        this.router.navigate(['/airlines']);
-      } else {
-        this.router.navigate(['/search']);
-      }
-    },
-    error: (error) => {
-      console.error('Registration error:', error);
-      this.error = error.message || 'Registration failed. Please try again.';
-      this.loading = false;
-    }
-  });
-}
-
 
   toggleRegister(): void {
     this.showRegister = !this.showRegister;
     this.error = null;
     this.loginForm.reset();
     this.registerForm.reset();
+    this.cdr.detectChanges();
   }
 }

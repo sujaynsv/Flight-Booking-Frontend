@@ -22,6 +22,8 @@ export class ProfileComponent implements OnInit {
   error: string | null = null;
   success: string | null = null;
 
+  showPasswordForm = false;   // ← toggle
+
   ngOnInit(): void {
     this.passwordForm = this.fb.group({
       currentPassword: ['', [Validators.required, Validators.minLength(6)]],
@@ -31,8 +33,17 @@ export class ProfileComponent implements OnInit {
   }
 
   passwordMatchValidator(form: FormGroup) {
-    return form.get('newPassword')?.value === form.get('confirmPassword')?.value 
+    return form.get('newPassword')?.value === form.get('confirmPassword')?.value
       ? null : { mismatch: true };
+  }
+
+  togglePasswordForm(): void {
+    this.showPasswordForm = !this.showPasswordForm;
+    this.error = null;
+    this.success = null;
+    if (!this.showPasswordForm) {
+      this.passwordForm.reset();
+    }
   }
 
   changePassword(): void {
@@ -46,12 +57,13 @@ export class ProfileComponent implements OnInit {
     this.success = null;
 
     const { currentPassword, newPassword } = this.passwordForm.value;
-    
+
     this.authService.changePassword(currentPassword, newPassword).subscribe({
       next: () => {
         this.loading = false;
         this.success = 'Password changed successfully!';
         this.passwordForm.reset();
+        this.showPasswordForm = false;  // hide after success
       },
       error: (error) => {
         this.loading = false;

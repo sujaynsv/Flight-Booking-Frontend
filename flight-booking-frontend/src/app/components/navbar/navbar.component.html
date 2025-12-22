@@ -1,41 +1,69 @@
 <nav class="navbar">
-  <div class="navbar-brand">
-    <!-- For admins, brand can go to /airlines; for users to /search -->
+  <div class="navbar-left">
+    <!-- Brand -->
     <button
-      *ngIf="(currentUser$ | async) as user"
-      [routerLink]="user.role === 'ADMIN' ? '/airlines' : '/search'"
-      class="booking-button">
+      *ngIf="(currentUser$ | async) as user; else publicBrand"
+      [routerLink]="user.role === 'ADMIN' ? '/admin' : '/search'"
+      class="brand-btn">
       Flight Booking
     </button>
+
+    <ng-template #publicBrand>
+      <button routerLink="/" class="brand-btn">
+        Flight Booking
+      </button>
+    </ng-template>
   </div>
 
-  <div class="navbar-content">
-    <div *ngIf="(currentUser$ | async) as user" class="user-info">
-      <span class="user-name">
-        Welcome, {{ user.firstName }} {{ user.lastName }}
-      </span>
+  <div class="navbar-right">
+    <!-- Logged-in state -->
+    <div *ngIf="(currentUser$ | async) as user; else guestActions" class="user-area">
+      <div class="user-text">
+        <span class="user-name">Welcome, {{ user.firstName }} {{ user.lastName }}</span>
+        <span class="user-role">
+          {{ user.role === 'ADMIN' ? 'Admin' : 'Passenger' }}
+        </span>
+      </div>
 
-        <button routerLink="/profile" class="btn btn-profile" title="Profile">
-          <i class="user-icon"></i> Profile
+      <!-- Actions -->
+      <div class="nav-actions">
+        <button routerLink="/profile" class="btn pill btn-profile">
+          Profile
         </button>
 
-      <!-- Admin-only -->
-      <ng-container *ngIf="user.role === 'ADMIN'; else passengerMenu">
-        <button routerLink="/airlines">Manage Airlines</button>
-        <button routerLink="/inventory">Add Flight</button>
-      </ng-container>
+        <!-- Admin-only -->
+        <ng-container *ngIf="user.role === 'ADMIN'; else passengerMenu">
+          <button routerLink="/airlines" class="btn pill">
+            Manage Airlines
+          </button>
+          <button routerLink="/inventory" class="btn pill">
+            Add Flight
+          </button>
+        </ng-container>
 
-      <!-- Passenger-only -->
-      <ng-template #passengerMenu>
-        <button routerLink="/search">Search Flights</button>
-        <button routerLink="/tickets">My Bookings</button>
-      </ng-template>
+        <!-- Passenger-only -->
+        <ng-template #passengerMenu>
+          <button routerLink="/search" class="btn pill">
+            Search Flights
+          </button>
+          <button routerLink="/tickets" class="btn pill">
+            My Bookings
+          </button>
+        </ng-template>
 
-      <button (click)="logout()" class="btn btn-logout">Logout</button>
+        <button (click)="logout()" class="btn pill btn-logout">
+          Logout
+        </button>
+      </div>
     </div>
 
-    <div *ngIf="!(isLoggedIn$ | async)" class="user-info">
-      <button routerLink="/login" class="btn btn-login">Login</button>
-    </div>
+    <!-- Logged-out state -->
+    <ng-template #guestActions>
+      <div class="guest-area">
+        <button routerLink="/login" class="btn pill btn-login">
+          Login / Register
+        </button>
+      </div>
+    </ng-template>
   </div>
 </nav>

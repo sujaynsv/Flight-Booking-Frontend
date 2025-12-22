@@ -1,7 +1,7 @@
 <div class="profile-container">
   <div class="profile-card">
     <h2>My Profile</h2>
-    
+
     <!-- User Info -->
     <div class="user-info-section" *ngIf="user$ | async as user">
       <div class="info-row">
@@ -22,12 +22,21 @@
           {{ user.role }}
         </span>
       </div>
+
+      <!-- Toggle button -->
+      <div class="password-toggle-row">
+        <button type="button"
+                class="btn-secondary"
+                (click)="togglePasswordForm()">
+          {{ showPasswordForm ? 'Cancel' : 'Change Password' }}
+        </button>
+      </div>
     </div>
 
-    <!-- Password Change Form -->
-    <div class="password-section">
+    <!-- Password Change Form (only when toggled) -->
+    <div class="password-section" *ngIf="showPasswordForm">
       <h3>Change Password</h3>
-      
+
       <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
         <div class="form-group">
           <label>Current Password</label>
@@ -48,7 +57,8 @@
         <div class="form-group">
           <label>Confirm New Password</label>
           <input type="password" formControlName="confirmPassword" required>
-          <div class="error" *ngIf="passwordForm.get('confirmPassword')?.invalid && passwordForm.get('confirmPassword')?.touched">
+          <div class="error"
+               *ngIf="passwordForm.hasError('mismatch') && passwordForm.get('confirmPassword')?.touched">
             Passwords must match
           </div>
         </div>
