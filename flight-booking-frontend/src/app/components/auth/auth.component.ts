@@ -82,9 +82,26 @@ export class AuthComponent implements OnInit {
       },
       error: (error) => {
         console.error('Login error:', error);
-        this.error = error.message || 'Login failed. Please try again.';
         this.loading = false;
-        this.cdr.detectChanges();
+        
+        const errorMessage = error.message || 'Login failed. Please try again.';
+        
+        // ← CHECK IF PASSWORD EXPIRED
+        if (errorMessage.includes('Password has expired') || 
+            errorMessage.includes('expired')) {
+          
+          // Store email for password reset
+          localStorage.setItem('passwordResetEmail', email);
+          
+          // Redirect to change password page
+          this.router.navigate(['/change-password'], {
+            queryParams: { expired: true }
+          });
+        } else {
+          // Show normal error
+          this.error = errorMessage;
+          this.cdr.detectChanges();
+        }
       }
     });
   }

@@ -10,6 +10,7 @@ import { RoleGuard } from './guards/role.guard';
 import { ProfileComponent } from './components/profile/profile.component';
 import { AdminHomeComponent } from './components/admin-home/admin-home.component';
 import { HomeComponent } from './components/home/home.component';
+import { ChangePasswordComponent } from './components/change-password/change-password.component';
 
 export const routes: Routes = [
 
@@ -73,6 +74,10 @@ export const routes: Routes = [
     component: AddFlightComponent,
     canActivate: [AuthGuard, RoleGuard],
     data: { roles: ['ADMIN'] }
+  },
+  {
+    path: 'change-password', component: ChangePasswordComponent
+
   },
 
 

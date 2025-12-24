@@ -187,6 +187,14 @@ changePassword(currentPassword: string, newPassword: string): Observable<any> {
   );
 }
 
+resetPasswordWithCredentials(email: string, currentPassword: string, newPassword: string): Observable<any> {
+  return this.http.patch(`${this.apiUrl}/password-reset`, {
+    email,
+    currentPassword,
+    newPassword
+  });
+}
+
 
 }
 
