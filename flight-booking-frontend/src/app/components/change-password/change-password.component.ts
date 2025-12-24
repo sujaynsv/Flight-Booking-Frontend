@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { strongPasswordValidator } from '../../validators/password-validator';  // ← ADD THIS
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -27,13 +28,15 @@ export class ChangePasswordComponent implements OnInit {
   ) {
     this.passwordForm = this.fb.group({
       currentPassword: ['', Validators.required],
-      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      newPassword: ['', [
+        Validators.required,
+        strongPasswordValidator()  // ← ADD STRONG PASSWORD VALIDATOR
+      ]],
       confirmPassword: ['', Validators.required]
     });
   }
 
   ngOnInit(): void {
-    // Check if redirected due to expired password
     this.route.queryParams.subscribe(params => {
       if (params['expired'] === 'true') {
         this.isExpired = true;
@@ -41,6 +44,33 @@ export class ChangePasswordComponent implements OnInit {
         this.error = 'Your password has expired. Please change it to continue.';
       }
     });
+  }
+
+  // ← ADD HELPER METHOD
+  getPasswordErrors(): string[] {
+    const errors: string[] = [];
+    const passwordControl = this.passwordForm.get('newPassword');
+    
+    if (passwordControl?.errors && passwordControl.touched) {
+      const strongPasswordError = passwordControl.errors['strongPassword'];
+      
+      if (strongPasswordError) {
+        if (!strongPasswordError.hasMinLength) {
+          errors.push('At least 12 characters');
+        }
+        if (!strongPasswordError.hasLowerCase) {
+          errors.push('At least one lowercase letter');
+        }
+        if (!strongPasswordError.hasUpperCase) {
+          errors.push('At least one uppercase letter');
+        }
+        if (!strongPasswordError.hasNumber) {
+          errors.push('At least one number');
+        }
+      }
+    }
+    
+    return errors;
   }
 
   onSubmit(): void {
@@ -64,9 +94,7 @@ export class ChangePasswordComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    // ← USE DIFFERENT METHOD BASED ON isExpired
     if (this.isExpired && this.userEmail) {
-      // Unauthenticated password reset (for expired passwords)
       this.authService.resetPasswordWithCredentials(
         this.userEmail, 
         currentPassword, 
@@ -75,11 +103,7 @@ export class ChangePasswordComponent implements OnInit {
         next: (response) => {
           this.success = 'Password changed successfully! Redirecting to login...';
           this.loading = false;
-          
-          // Clear stored email
           localStorage.removeItem('passwordResetEmail');
-          
-          // Redirect to login
           setTimeout(() => {
             this.router.navigate(['/login']);
           }, 2000);
@@ -90,7 +114,6 @@ export class ChangePasswordComponent implements OnInit {
         }
       });
     } else {
-      // Authenticated password change (original method)
       this.authService.changePassword(currentPassword, newPassword).subscribe({
         next: (response) => {
           this.success = 'Password changed successfully!';

@@ -112,8 +112,16 @@
             placeholder="Enter your password"
             [class.invalid]="registerForm.get('password')?.invalid && registerForm.get('password')?.touched"
           />
-          <div class="field-error" *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched">
-            Password must be at least 6 characters
+          <div class="password-requirements" *ngIf="registerForm.get('password')?.touched">
+            <div class="requirement-title">Password must contain:</div>
+            <ul class="requirements-list">
+              <li *ngFor="let error of getPasswordErrors()" class="requirement-item">
+                ✗ {{ error }}
+              </li>
+              <li *ngIf="getPasswordErrors().length === 0" class="requirement-item valid">
+                ✓ Strong password
+              </li>
+            </ul>
           </div>
         </div>
 

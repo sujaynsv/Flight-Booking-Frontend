@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { filter, take } from 'rxjs/operators';
+import { strongPasswordValidator } from '../../validators/password-validator';
 
 @Component({
   selector: 'app-auth',
@@ -34,7 +35,7 @@ export class AuthComponent implements OnInit {
 
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, strongPasswordValidator()]],
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       role: ['USER', Validators.required]
@@ -53,6 +54,31 @@ export class AuthComponent implements OnInit {
         }
       }
     });
+  }
+    getPasswordErrors(): string[] {
+    const errors: string[] = [];
+    const passwordControl = this.registerForm.get('password');
+    
+    if (passwordControl?.errors && passwordControl.touched) {
+      const strongPasswordError = passwordControl.errors['strongPassword'];
+      
+      if (strongPasswordError) {
+        if (!strongPasswordError.hasMinLength) {
+          errors.push('At least 12 characters');
+        }
+        if (!strongPasswordError.hasLowerCase) {
+          errors.push('At least one lowercase letter');
+        }
+        if (!strongPasswordError.hasUpperCase) {
+          errors.push('At least one uppercase letter');
+        }
+        if (!strongPasswordError.hasNumber) {
+          errors.push('At least one number');
+        }
+      }
+    }
+    
+    return errors;
   }
 
   onLogin(): void {
