@@ -1,76 +1,254 @@
 <div class="booking-container">
   <div class="booking-card">
 
-    <div *ngIf="flag">
-        <h2>{{successMessage}}</h2>
-        <p>PNR: {{pnr}}</p>
+    <!-- Success Message -->
+    <div *ngIf="flag" class="success-container">
+      <h2>{{ successMessage }}</h2>
+      <p class="pnr-display">PNR: <strong>{{ pnr }}</strong></p>
+      <button type="button" (click)="cancel()" class="btn-primary">
+        Back to Search
+      </button>
     </div>
-    <h1>Book Flight</h1>
 
-    <form *ngIf="!flag" [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
-      <h3>Contact Info</h3>
-      <input type="text" formControlName="name" placeholder="Your Name" />
-      <input type="email" formControlName="email" placeholder="Email" />
+    <!-- Booking Form -->
+    <div *ngIf="!flag">
+      <h1>Book Flight</h1>
 
-      <div formArrayName="passengers">
-        <h3>
-            Passenger Details ({{passengers.length}} passenger{{passengers.length>1 ? 's': ''}})
-        </h3>
+      <!-- Flight Info -->
+      <div *ngIf="flight" class="flight-info">
+        <h3>Flight Details</h3>
+        <p><strong>{{ flight.airlineName }}</strong> ({{ flight.flightNumber }})</p>
+        <p>{{ flight.fromPlace }} → {{ flight.toPlace }}</p>
+        <p>Available Seats: <strong>{{ flight.availableSeats }}</strong> / {{ flight.totalSeats }}</p>
+      </div>
+
+      <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
         
-        <div *ngFor="let passenger of passengers.controls; let i=index"
-             [formGroupName]="i"
-             class="passenger-section">
+        <!-- Contact Info -->
+        <h3>Contact Info</h3>
+        <input 
+          type="text" 
+          formControlName="name" 
+          placeholder="Your Name"
+          [class.invalid]="bookingForm.get('name')?.invalid && bookingForm.get('name')?.touched"
+        />
+        <div class="field-error" *ngIf="bookingForm.get('name')?.invalid && bookingForm.get('name')?.touched">
+          Name is required
+        </div>
+
+        <input 
+          type="email" 
+          formControlName="email" 
+          placeholder="Email"
+          [class.invalid]="bookingForm.get('email')?.invalid && bookingForm.get('email')?.touched"
+        />
+        <div class="field-error" *ngIf="bookingForm.get('email')?.invalid && bookingForm.get('email')?.touched">
+          Valid email is required
+        </div>
+
+        <!-- Passenger Details -->
+        <div formArrayName="passengers">
+          <h3>
+            Passenger Details ({{ passengers.length }} passenger{{ passengers.length > 1 ? 's' : '' }})
+          </h3>
+          
+          <div *ngFor="let passenger of passengers.controls; let i = index"
+               [formGroupName]="i"
+               class="passenger-section">
 
             <h4>
-                Passenger {{i+1}}
-                <button type="button"
-                        (click)="removePassenger(i)"
-                        *ngIf="passengers.length>1"
-                        class="remove-btn">
-                  Remove
-                </button>
+              Passenger {{ i + 1 }}
+              <button 
+                type="button"
+                (click)="removePassenger(i)"
+                *ngIf="passengers.length > 1"
+                class="remove-btn">
+                Remove
+              </button>
             </h4>
 
-            <input type="text"
-                   formControlName="passengerName"
-                   placeholder="Name" />
+            <!-- Passenger Name -->
+            <div class="form-group">
+              <input 
+                type="text"
+                formControlName="passengerName"
+                placeholder="Passenger Name"
+                [class.invalid]="passenger.get('passengerName')?.invalid && passenger.get('passengerName')?.touched"
+              />
+              <div class="field-error" *ngIf="passenger.get('passengerName')?.invalid && passenger.get('passengerName')?.touched">
+                Passenger name is required
+              </div>
+            </div>
 
-            <select formControlName="gender">
-              <option value="MALE">MALE</option>
-              <option value="FEMALE">FEMALE</option>
-            </select>
+            <!-- Gender -->
+            <div class="form-group">
+              <select 
+                formControlName="gender"
+                [class.invalid]="passenger.get('gender')?.invalid && passenger.get('gender')?.touched"
+              >
+                <option value="" disabled selected>Select Gender</option>
+                <option value="MALE">MALE</option>
+                <option value="FEMALE">FEMALE</option>
+              </select>
+              <div class="field-error" *ngIf="passenger.get('gender')?.invalid && passenger.get('gender')?.touched">
+                Gender is required
+              </div>
+            </div>
 
-            <input type="number"
-                   formControlName="age"
-                   placeholder="Age"
-                   min="1" />
+            <!-- Age -->
+            <div class="form-group">
+              <input 
+                type="number"
+                formControlName="age"
+                placeholder="Age"
+                min="1"
+                max="120"
+                [class.invalid]="passenger.get('age')?.invalid && passenger.get('age')?.touched"
+              />
+              <div class="field-error" *ngIf="passenger.get('age')?.invalid && passenger.get('age')?.touched">
+                Valid age is required
+              </div>
+            </div>
 
-            <select formControlName="mealPreference">
-              <option value="VEG">VEG</option>
-              <option value="NON_VEG">NON_VEG</option>
-            </select>
+            <!-- Meal Preference -->
+            <div class="form-group">
+              <select 
+                formControlName="mealPreference"
+                [class.invalid]="passenger.get('mealPreference')?.invalid && passenger.get('mealPreference')?.touched"
+              >
+                <option value="" disabled selected>Select Meal Preference</option>
+                <option value="VEG">VEG</option>
+                <option value="NON_VEG">NON_VEG</option>
+              </select>
+              <div class="field-error" *ngIf="passenger.get('mealPreference')?.invalid && passenger.get('mealPreference')?.touched">
+                Meal preference is required
+              </div>
+            </div>
 
-            <input type="text"
-                   formControlName="seatNumber" 
-                   placeholder="Seat Eg. A1" />
+            <!-- Seat Selection with Modal -->
+            <div class="form-group">
+              <label>Seat Number</label>
+              <div class="seat-selection-wrapper">
+                <input 
+                  type="text"
+                  formControlName="seatNumber"
+                  placeholder="Click 'Choose Seat' to select"
+                  readonly
+                  [class.invalid]="passenger.get('seatNumber')?.invalid && passenger.get('seatNumber')?.touched"
+                />
+                <button 
+                  type="button" 
+                  (click)="openSeatMap(i)"
+                  class="choose-seat-btn">
+                 Choose Seat
+                </button>
+              </div>
+              
+              <!-- Seat Error Messages -->
+              <div class="field-error" *ngIf="passenger.get('seatNumber')?.invalid && passenger.get('seatNumber')?.touched">
+                Please select a seat
+              </div>
+              
+              <div class="field-error error-duplicate" *ngIf="isDuplicateSeat(passenger.value.seatNumber, i) && passenger.value.seatNumber">
+                Seat {{ passenger.value.seatNumber }} is already selected
+              </div>
+            </div>
 
+          </div>
+        </div>
+
+        <!-- Add Passenger Button -->
+        <button 
+          type="button" 
+          (click)="addPassenger()" 
+          class="add-passenger-btn"
+          [disabled]="flight && passengers.length >= flight.availableSeats">
+          Add another Passenger
+        </button>
+
+        <!-- Error Message -->
+        <div *ngIf="error" class="error-message">
+          {{ error }}
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="buttons">
+          <button 
+            type="button" 
+            (click)="cancel()"
+            class="btn-secondary">
+            Cancel
+          </button>
+          <button 
+            type="submit"
+            [disabled]="bookingForm.invalid || loading || hasDuplicateSeats()"
+            class="btn-primary">
+            {{ loading ? 'Booking...' : 'Book Flight' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- Seat Map Modal -->
+  <div *ngIf="showSeatMap" class="seat-map-overlay" (click)="closeSeatMap()">
+    <div class="seat-map-modal" (click)="$event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="seat-map-header">
+        <h2>Select Your Seat</h2>
+        <button type="button" (click)="closeSeatMap()" class="close-btn">&times;</button>
+      </div>
+
+      <!-- Legend -->
+      <div class="seat-legend">
+        <div class="legend-item">
+          <div class="seat-preview seat-available"></div>
+          <span>Available</span>
+        </div>
+        <div class="legend-item">
+          <div class="seat-preview seat-booked"></div>
+          <span>Booked</span>
+        </div>
+        <div class="legend-item">
+          <div class="seat-preview seat-selected"></div>
+          <span>Your Selection</span>
         </div>
       </div>
 
-      <button type="button" 
-              (click)="addPassenger()" 
-              class="add-passenger-btn">
-        Add another Passenger
-      </button>
+      <!-- Seat Map -->
+      <div class="seat-map-container">
+        <div class="cockpit">← COCKPIT →</div>
+        
+        <div class="seats-grid">
+          <div *ngFor="let row of seats; let rowIndex = index" class="seat-row">
+            <div class="row-label">{{ rowIndex + 1 }}</div>
+            <div *ngFor="let seat of row; let i = index" class="seat-wrapper">
+              <button
+                type="button"
+                class="seat"
+                [class.seat-available]="!seat.isBooked && !seat.isSelected"
+                [class.seat-booked]="seat.isBooked"
+                [class.seat-selected]="seat.isSelected"
+                [disabled]="seat.isBooked"
+                [title]="seat.isBooked ? 'Already booked' : 'Available'"
+                (click)="selectSeat(seat)">
+                {{ seat.number }}
+              </button>
+              <!-- Aisle after 3rd seat (ABC | DEF) -->
+              <div *ngIf="i === 2" class="aisle">
+                <div class="aisle-line"></div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <div *ngIf="error" class="error">{{error}}</div>
-      
-      <div class="buttons">
-        <button type="button" (click)="cancel()">Cancel</button>
-        <button type="submit">
-          {{ loading ? 'Booking...' : 'Book' }}
-        </button>
+        <div class="seat-map-footer">
+          <p>Click on an available seat to select</p>
+        </div>
       </div>
-    </form>
+    </div>
   </div>
+
 </div>

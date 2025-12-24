@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Flight, FlightSearchRequest } from '../models/flight.model';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
 @Injectable({
@@ -41,4 +41,28 @@ export class FlightService {
       })
     );
   }
+
+  getBookedSeats(flightId: string): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/inventory/${flightId}/booked-seats`)
+      .pipe(
+        map((response: any) => {
+          console.log('Raw API response:', response);
+          
+          // The API returns a plain array
+          if (Array.isArray(response)) {
+            return response;
+          }
+          
+          // Fallback if it's an object with bookedSeats property
+          if (response && response.bookedSeats) {
+            return response.bookedSeats;
+          }
+          
+          // Default empty array
+          return [];
+        })
+      );
+  }
+
+
 }
