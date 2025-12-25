@@ -11,6 +11,7 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { AdminHomeComponent } from './components/admin-home/admin-home.component';
 import { HomeComponent } from './components/home/home.component';
 import { ChangePasswordComponent } from './components/change-password/change-password.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
 
 export const routes: Routes = [
 
@@ -78,6 +79,10 @@ export const routes: Routes = [
   {
     path: 'change-password', component: ChangePasswordComponent
 
+  },
+  {
+    path:'forgot-password',
+    component: ForgotPasswordComponent
   },
 
 

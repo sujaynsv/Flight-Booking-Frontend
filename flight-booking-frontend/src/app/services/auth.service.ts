@@ -195,6 +195,14 @@ resetPasswordWithCredentials(email: string, currentPassword: string, newPassword
   });
 }
 
+forgotPassword(email: string): Observable<{ message: string }> {
+  return this.http.post<{ message: string }>('http://localhost:8080/auth/forgot-password', { email });
+}
+
+resetPassword(request: { email: string; code: string; newPassword: string }): Observable<{ message: string }> {
+  return this.http.post<{ message: string }>('http://localhost:8080/auth/reset-password', request);
+}
+
 
 }
 
