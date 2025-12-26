@@ -11,7 +11,41 @@
 
 .email-info {
   color: #666;
+  margin-bottom: 20px;
+}
+
+/* Filter Tabs */
+.filter-tabs {
+  display: flex;
+  gap: 10px;
   margin-bottom: 30px;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0;
+}
+
+.filter-tab {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  color: #666;
+  transition: all 0.3s;
+  position: relative;
+  bottom: -2px;
+}
+
+.filter-tab:hover {
+  color: #667eea;
+  background: #f8f9ff;
+}
+
+.filter-tab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+  background: #f8f9ff;
 }
 
 .loading-message {
@@ -32,6 +66,7 @@
   text-align: center;
   padding: 40px;
   color: #999;
+  font-size: 18px;
 }
 
 .booking-card {
@@ -41,6 +76,12 @@
   margin-bottom: 20px;
   background: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.booking-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .booking-header {
@@ -123,6 +164,7 @@
   border-radius: 5px;
   cursor: pointer;
   font-weight: 600;
+  transition: background 0.3s;
 }
 
 .btn-cancel:hover {
@@ -156,6 +198,7 @@
   cursor: pointer;
   font-weight: 600;
   margin-right: 10px;
+  transition: background 0.3s;
 }
 
 .btn-confirm-yes:hover {
@@ -175,6 +218,7 @@
   border-radius: 5px;
   cursor: pointer;
   font-weight: 600;
+  transition: background 0.3s;
 }
 
 .btn-confirm-no:hover {
@@ -192,14 +236,16 @@
   border: 1px solid #f5c6cb;
   border-radius: 5px;
   padding: 15px;
-  margin-top: 20px;
+  position: fixed;
+  top: 45%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  min-width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-.cancel-error{
-    position: fixed;
-    top: 45%;
-    left: 35%;
-    z-index: 1001;
+.cancel-error p {
   margin: 0 0 10px 0;
   font-weight: 600;
 }
@@ -211,6 +257,7 @@
   padding: 8px 15px;
   border-radius: 5px;
   cursor: pointer;
+  transition: background 0.3s;
 }
 
 .btn-dismiss:hover {

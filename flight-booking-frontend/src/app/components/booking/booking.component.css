@@ -470,3 +470,128 @@ input[readonly] {
     flex-direction: column;
   }
 }
+
+
+/* Step container */
+.step-container {
+  padding: 20px 0;
+}
+
+.step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #667eea;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 14px;
+}
+
+.btn-link:hover {
+  color: #5568d3;
+}
+
+/* Passenger selector */
+.passenger-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  margin: 30px 0;
+}
+
+.btn-counter {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #667eea;
+  background: white;
+  color: #667eea;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-counter:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+  transform: scale(1.1);
+}
+
+.btn-counter:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.passenger-count {
+  font-size: 48px;
+  font-weight: bold;
+  color: #2c3e50;
+  min-width: 60px;
+  text-align: center;
+}
+
+.helper-text {
+  text-align: center;
+  color: #7f8c8d;
+  margin-bottom: 30px;
+}
+
+/* Selected seats display */
+.selected-seats-display {
+  background: #e8f4f8;
+  border-left: 4px solid #667eea;
+  padding: 15px;
+  margin-bottom: 25px;
+  border-radius: 4px;
+}
+
+.selected-seats-display p {
+  margin: 0;
+  color: #2c3e50;
+}
+
+/* Seats selected count */
+.seats-selected-count {
+  font-size: 16px;
+  color: #667eea;
+  font-weight: 600;
+  margin: 10px 0 0 0;
+}
+
+/* Form rows */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+/* Modal buttons */
+.modal-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.modal-buttons button {
+  flex: 1;
+}
+
+/* Error message in modal */
+.error-message-modal {
+  background: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  text-align: center;
+}

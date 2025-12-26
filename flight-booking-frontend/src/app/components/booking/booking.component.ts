@@ -32,11 +32,12 @@ export class BookingComponent implements OnInit {
   successMessage: string | null = null;
   flag: boolean = false;
 
-  // Seat map properties
+  currentStep: number = 1; 
+  numberOfPassengers: number = 1;
+
   seats: Seat[][] = [];
   bookedSeats: string[] = [];
   selectedSeats: string[] = [];
-  currentPassengerIndex: number = -1;
   showSeatMap: boolean = false;
 
   constructor(
@@ -56,10 +57,7 @@ export class BookingComponent implements OnInit {
       email: ['sujaynsv@gmail.com', [Validators.required, Validators.email]],
       passengers: this.fb.array([])
     });
-
-    this.addPassenger();
     
-    // Load both flight details and booked seats together
     this.loadFlightDataAndSeats();
   }
 
@@ -76,9 +74,8 @@ export class BookingComponent implements OnInit {
         
         console.log('Flight loaded:', this.flight);
         console.log('Booked seats loaded:', this.bookedSeats);
-        console.log('Number of booked seats:', this.bookedSeats.length);
         
-        // Generate seat map AFTER both are loaded
+        // Generate seat map
         this.generateSeatMap();
       },
       error: (err) => {
@@ -89,39 +86,26 @@ export class BookingComponent implements OnInit {
     });
   }
 
-  createPassengerForm(): FormGroup { 
-    return this.fb.group({
-      passengerName: ['', Validators.required],
-      age: ['', [Validators.required, Validators.min(1), Validators.max(120)]],
-      mealPreference: ['', Validators.required],
-      gender: ['', Validators.required],
-      seatNumber: ['', Validators.required]
-    });
-  }
-  
-  get passengers(): FormArray {
-    return this.bookingForm.get('passengers') as FormArray;
-  }
-
-  addPassenger(): void {
-    if (this.flight?.availableSeats && this.passengers.length >= this.flight.availableSeats) {
-      this.error = 'Cannot add more passengers than available seats';
+  // Step 1: Set number of passengers
+  setNumberOfPassengers(count: number): void {
+    if (this.flight && count > this.flight.availableSeats) {
+      this.error = `Only ${this.flight.availableSeats} seats available`;
       return;
     }
-    this.passengers.push(this.createPassengerForm());
+    this.numberOfPassengers = count;
+    this.error = null;
   }
 
-  removePassenger(index: number): void {
-    if (this.passengers.length > 1) {
-      const seatNumber = this.passengers.at(index).value.seatNumber;
-      if (seatNumber) {
-        this.selectedSeats = this.selectedSeats.filter(s => s !== seatNumber);
-      }
-      this.passengers.removeAt(index);
-      this.generateSeatMap();
+  goToSeatSelection(): void {
+    if (this.numberOfPassengers < 1) {
+      this.error = 'Please select at least 1 passenger';
+      return;
     }
+    this.currentStep = 2;
+    this.showSeatMap = true;
   }
 
+  // Step 2: Select seats
   generateSeatMap(): void {
     const totalSeats = this.flight?.totalSeats;
     
@@ -132,7 +116,7 @@ export class BookingComponent implements OnInit {
 
     console.log('Generating seat map');
     console.log('Total seats:', totalSeats);
-    console.log('Booked seats to mark:', this.bookedSeats);
+    console.log('Booked seats:', this.bookedSeats);
     console.log('Selected seats:', this.selectedSeats);
 
     const seatsPerRow = 6;
@@ -149,10 +133,6 @@ export class BookingComponent implements OnInit {
         const isBooked = this.bookedSeats.includes(seatNumber);
         const isSelected = this.selectedSeats.includes(seatNumber);
         
-        if (isBooked) {
-          console.log(`Seat ${seatNumber} is BOOKED`);
-        }
-        
         rowSeats.push({
           number: seatNumber,
           isBooked: isBooked,
@@ -166,92 +146,92 @@ export class BookingComponent implements OnInit {
     console.log('Seat map generated:', this.seats.length, 'rows');
   }
 
-  openSeatMap(passengerIndex: number): void {
-    this.currentPassengerIndex = passengerIndex;
-    this.showSeatMap = true;
-  }
-
   selectSeat(seat: Seat): void {
     if (seat.isBooked) {
       console.warn('Cannot select booked seat:', seat.number);
       return;
     }
 
-    if (this.currentPassengerIndex === -1) return;
-
-    const currentSeat = this.passengers.at(this.currentPassengerIndex).value.seatNumber;
-
-    // Remove old selection if exists
-    if (currentSeat) {
-      this.selectedSeats = this.selectedSeats.filter(s => s !== currentSeat);
+    // Check if already selected
+    const index = this.selectedSeats.indexOf(seat.number);
+    
+    if (index > -1) {
+      // Deselect
+      this.selectedSeats.splice(index, 1);
+    } else {
+      // Select only if under limit
+      if (this.selectedSeats.length >= this.numberOfPassengers) {
+        this.error = `You can only select ${this.numberOfPassengers} seat(s)`;
+        return;
+      }
+      this.selectedSeats.push(seat.number);
+      this.error = null;
     }
 
-    // Add new selection
-    this.passengers.at(this.currentPassengerIndex).patchValue({
-      seatNumber: seat.number
+    console.log('Selected seats:', this.selectedSeats);
+    this.generateSeatMap();
+  }
+
+  canProceedToPassengerDetails(): boolean {
+    return this.selectedSeats.length === this.numberOfPassengers;
+  }
+
+  goToPassengerDetails(): void {
+    if (!this.canProceedToPassengerDetails()) {
+      this.error = `Please select exactly ${this.numberOfPassengers} seat(s)`;
+      return;
+    }
+
+    // Create passenger forms for each selected seat
+    this.passengers.clear();
+    this.selectedSeats.forEach((seatNumber) => {
+      const passengerForm = this.createPassengerForm();
+      passengerForm.patchValue({ seatNumber: seatNumber });
+      this.passengers.push(passengerForm);
     });
 
-    if (!this.selectedSeats.includes(seat.number)) {
-      this.selectedSeats.push(seat.number);
-    }
+    this.currentStep = 3;
+    this.showSeatMap = false;
+  }
 
-    console.log('Seat selected:', seat.number);
+  backToSeatSelection(): void {
+    this.currentStep = 2;
+    this.showSeatMap = true;
+  }
 
-    // Update seat map
+  backToPassengerCount(): void {
+    this.currentStep = 1;
+    this.selectedSeats = [];
+    this.passengers.clear();
     this.generateSeatMap();
-    
-    // Close seat map
-    this.closeSeatMap();
   }
 
   closeSeatMap(): void {
-    this.showSeatMap = false;
-    this.currentPassengerIndex = -1;
-  }
-
-  hasDuplicateSeats(): boolean {
-    const seatNumbers = this.passengers.controls
-      .map(p => p.value.seatNumber)
-      .filter(s => s && s.trim() !== '');
-    
-    const uniqueSeats = new Set(seatNumbers);
-    return uniqueSeats.size !== seatNumbers.length;
-  }
-
-  isDuplicateSeat(seatNumber: string, currentIndex: number): boolean {
-    if (!seatNumber || seatNumber.trim() === '') return false;
-    
-    const seatCount = this.passengers.controls.filter((p, index) => 
-      index !== currentIndex && 
-      p.value.seatNumber && 
-      p.value.seatNumber.toUpperCase() === seatNumber.toUpperCase()
-    ).length;
-    
-    return seatCount > 0;
-  }
-
-  onSeatChange(index: number): void {
-    const seatNumber = this.passengers.at(index).value.seatNumber;
-    
-    if (this.isDuplicateSeat(seatNumber, index)) {
-      this.error = `Seat ${seatNumber} is already selected for another passenger`;
-    } else if (this.error && this.error.includes('already selected')) {
-      this.error = null;
+    if (this.currentStep === 2) {
+      this.currentStep = 1;
     }
-    
-    this.cdr.detectChanges();
+    this.showSeatMap = false;
+  }
+
+  // Step 3: Fill passenger details
+  createPassengerForm(): FormGroup { 
+    return this.fb.group({
+      passengerName: ['', Validators.required],
+      age: ['', [Validators.required, Validators.min(1), Validators.max(120)]],
+      mealPreference: ['', Validators.required],
+      gender: ['', Validators.required],
+      seatNumber: ['', Validators.required]
+    });
+  }
+  
+  get passengers(): FormArray {
+    return this.bookingForm.get('passengers') as FormArray;
   }
 
   onSubmit(): void {
     if (this.bookingForm.invalid) {
       this.error = 'Please fill all fields correctly';
       this.bookingForm.markAllAsTouched();
-      return;
-    }
-
-    if (this.hasDuplicateSeats()) {
-      this.error = 'Duplicate seat numbers are not allowed. Each passenger must have a unique seat.';
-      this.cdr.detectChanges();
       return;
     }
 

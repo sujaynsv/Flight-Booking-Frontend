@@ -22,183 +22,170 @@
         <p>Available Seats: <strong>{{ flight.availableSeats }}</strong> / {{ flight.totalSeats }}</p>
       </div>
 
-      <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+      <!-- Step 1: Select Number of Passengers -->
+      <div *ngIf="currentStep === 1" class="step-container">
+        <h3>Step 1: How many passengers?</h3>
         
-        <!-- Contact Info -->
-        <h3>Contact Info</h3>
-        <input 
-          type="text" 
-          formControlName="name" 
-          placeholder="Your Name"
-          [class.invalid]="bookingForm.get('name')?.invalid && bookingForm.get('name')?.touched"
-        />
-        <div class="field-error" *ngIf="bookingForm.get('name')?.invalid && bookingForm.get('name')?.touched">
-          Name is required
-        </div>
-
-        <input 
-          type="email" 
-          formControlName="email" 
-          placeholder="Email"
-          [class.invalid]="bookingForm.get('email')?.invalid && bookingForm.get('email')?.touched"
-        />
-        <div class="field-error" *ngIf="bookingForm.get('email')?.invalid && bookingForm.get('email')?.touched">
-          Valid email is required
-        </div>
-
-        <!-- Passenger Details -->
-        <div formArrayName="passengers">
-          <h3>
-            Passenger Details ({{ passengers.length }} passenger{{ passengers.length > 1 ? 's' : '' }})
-          </h3>
+        <div class="passenger-selector">
+          <button 
+            type="button" 
+            (click)="setNumberOfPassengers(numberOfPassengers - 1)"
+            [disabled]="numberOfPassengers <= 1"
+            class="btn-counter">
+            −
+          </button>
           
-          <div *ngFor="let passenger of passengers.controls; let i = index"
-               [formGroupName]="i"
-               class="passenger-section">
-
-            <h4>
-              Passenger {{ i + 1 }}
-              <button 
-                type="button"
-                (click)="removePassenger(i)"
-                *ngIf="passengers.length > 1"
-                class="remove-btn">
-                Remove
-              </button>
-            </h4>
-
-            <!-- Passenger Name -->
-            <div class="form-group">
-              <input 
-                type="text"
-                formControlName="passengerName"
-                placeholder="Passenger Name"
-                [class.invalid]="passenger.get('passengerName')?.invalid && passenger.get('passengerName')?.touched"
-              />
-              <div class="field-error" *ngIf="passenger.get('passengerName')?.invalid && passenger.get('passengerName')?.touched">
-                Passenger name is required
-              </div>
-            </div>
-
-            <!-- Gender -->
-            <div class="form-group">
-              <select 
-                formControlName="gender"
-                [class.invalid]="passenger.get('gender')?.invalid && passenger.get('gender')?.touched"
-              >
-                <option value="" disabled selected>Select Gender</option>
-                <option value="MALE">MALE</option>
-                <option value="FEMALE">FEMALE</option>
-              </select>
-              <div class="field-error" *ngIf="passenger.get('gender')?.invalid && passenger.get('gender')?.touched">
-                Gender is required
-              </div>
-            </div>
-
-            <!-- Age -->
-            <div class="form-group">
-              <input 
-                type="number"
-                formControlName="age"
-                placeholder="Age"
-                min="1"
-                max="120"
-                [class.invalid]="passenger.get('age')?.invalid && passenger.get('age')?.touched"
-              />
-              <div class="field-error" *ngIf="passenger.get('age')?.invalid && passenger.get('age')?.touched">
-                Valid age is required
-              </div>
-            </div>
-
-            <!-- Meal Preference -->
-            <div class="form-group">
-              <select 
-                formControlName="mealPreference"
-                [class.invalid]="passenger.get('mealPreference')?.invalid && passenger.get('mealPreference')?.touched"
-              >
-                <option value="" disabled selected>Select Meal Preference</option>
-                <option value="VEG">VEG</option>
-                <option value="NON_VEG">NON_VEG</option>
-              </select>
-              <div class="field-error" *ngIf="passenger.get('mealPreference')?.invalid && passenger.get('mealPreference')?.touched">
-                Meal preference is required
-              </div>
-            </div>
-
-            <!-- Seat Selection with Modal -->
-            <div class="form-group">
-              <label>Seat Number</label>
-              <div class="seat-selection-wrapper">
-                <input 
-                  type="text"
-                  formControlName="seatNumber"
-                  placeholder="Click 'Choose Seat' to select"
-                  readonly
-                  [class.invalid]="passenger.get('seatNumber')?.invalid && passenger.get('seatNumber')?.touched"
-                />
-                <button 
-                  type="button" 
-                  (click)="openSeatMap(i)"
-                  class="choose-seat-btn">
-                 Choose Seat
-                </button>
-              </div>
-              
-              <!-- Seat Error Messages -->
-              <div class="field-error" *ngIf="passenger.get('seatNumber')?.invalid && passenger.get('seatNumber')?.touched">
-                Please select a seat
-              </div>
-              
-              <div class="field-error error-duplicate" *ngIf="isDuplicateSeat(passenger.value.seatNumber, i) && passenger.value.seatNumber">
-                Seat {{ passenger.value.seatNumber }} is already selected
-              </div>
-            </div>
-
-          </div>
+          <span class="passenger-count">{{ numberOfPassengers }}</span>
+          
+          <button 
+            type="button" 
+            (click)="setNumberOfPassengers(numberOfPassengers + 1)"
+            [disabled]="flight && numberOfPassengers >= flight.availableSeats"
+            class="btn-counter">
+            +
+          </button>
         </div>
 
-        <!-- Add Passenger Button -->
-        <button 
-          type="button" 
-          (click)="addPassenger()" 
-          class="add-passenger-btn"
-          [disabled]="flight && passengers.length >= flight.availableSeats">
-          Add another Passenger
-        </button>
+        <p class="helper-text">Select the number of passengers (1-{{ flight?.availableSeats || 0 }})</p>
 
-        <!-- Error Message -->
         <div *ngIf="error" class="error-message">
           {{ error }}
         </div>
-        
-        <!-- Action Buttons -->
+
         <div class="buttons">
-          <button 
-            type="button" 
-            (click)="cancel()"
-            class="btn-secondary">
+          <button type="button" (click)="cancel()" class="btn-secondary">
             Cancel
           </button>
           <button 
-            type="submit"
-            [disabled]="bookingForm.invalid || loading || hasDuplicateSeats()"
+            type="button" 
+            (click)="goToSeatSelection()"
             class="btn-primary">
-            {{ loading ? 'Booking...' : 'Book Flight' }}
+            Next: Select Seats
           </button>
         </div>
-      </form>
+      </div>
+
+      <!-- Step 3: Fill Passenger Details -->
+      <div *ngIf="currentStep === 3">
+        <div class="step-header">
+          <h3>Step 3: Passenger Details</h3>
+          <button type="button" (click)="backToSeatSelection()" class="btn-link">
+            ← Change Seats
+          </button>
+        </div>
+
+        <!-- Selected Seats Display -->
+        <div class="selected-seats-display">
+          <p><strong>Selected Seats:</strong> {{ selectedSeats.join(', ') }}</p>
+        </div>
+
+        <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()">
+          
+          <!-- Contact Info -->
+          <h4>Contact Information</h4>
+          <div class="form-row">
+            <input 
+              type="text" 
+              formControlName="name" 
+              placeholder="Your Name"
+              [class.invalid]="bookingForm.get('name')?.invalid && bookingForm.get('name')?.touched"
+            />
+            <input 
+              type="email" 
+              formControlName="email" 
+              placeholder="Email"
+              [class.invalid]="bookingForm.get('email')?.invalid && bookingForm.get('email')?.touched"
+            />
+          </div>
+
+          <!-- Passenger Details -->
+          <div formArrayName="passengers">
+            <h4>Passenger Information</h4>
+            
+            <div *ngFor="let passenger of passengers.controls; let i = index"
+                 [formGroupName]="i"
+                 class="passenger-section">
+
+              <h5>
+                Passenger {{ i + 1 }} - Seat {{ passenger.value.seatNumber }}
+              </h5>
+
+              <div class="form-row">
+                <input 
+                  type="text"
+                  formControlName="passengerName"
+                  placeholder="Passenger Name"
+                  [class.invalid]="passenger.get('passengerName')?.invalid && passenger.get('passengerName')?.touched"
+                />
+                
+                <input 
+                  type="number"
+                  formControlName="age"
+                  placeholder="Age"
+                  min="1"
+                  max="120"
+                  [class.invalid]="passenger.get('age')?.invalid && passenger.get('age')?.touched"
+                />
+              </div>
+
+              <div class="form-row">
+                <select 
+                  formControlName="gender"
+                  [class.invalid]="passenger.get('gender')?.invalid && passenger.get('gender')?.touched"
+                >
+                  <option value="" disabled selected>Gender</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                </select>
+                
+                <select 
+                  formControlName="mealPreference"
+                  [class.invalid]="passenger.get('mealPreference')?.invalid && passenger.get('mealPreference')?.touched"
+                >
+                  <option value="" disabled selected>Meal Preference</option>
+                  <option value="VEG">Vegetarian</option>
+                  <option value="NON_VEG">Non-Vegetarian</option>
+                </select>
+              </div>
+
+            </div>
+          </div>
+
+          <div *ngIf="error" class="error-message">
+            {{ error }}
+          </div>
+          
+          <div class="buttons">
+            <button 
+              type="button" 
+              (click)="backToPassengerCount()"
+              class="btn-secondary">
+              ← Start Over
+            </button>
+            <button 
+              type="submit"
+              [disabled]="bookingForm.invalid || loading"
+              class="btn-primary">
+              {{ loading ? 'Booking...' : 'Confirm Booking' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
     </div>
 
   </div>
 
-  <!-- Seat Map Modal -->
-  <div *ngIf="showSeatMap" class="seat-map-overlay" (click)="closeSeatMap()">
+  <!-- Seat Map Modal (Step 2) -->
+  <div *ngIf="showSeatMap && currentStep === 2" class="seat-map-overlay">
     <div class="seat-map-modal" (click)="$event.stopPropagation()">
       
       <!-- Modal Header -->
       <div class="seat-map-header">
-        <h2>Select Your Seat</h2>
-        <button type="button" (click)="closeSeatMap()" class="close-btn">&times;</button>
+        <h2>Step 2: Select {{ numberOfPassengers }} Seat(s)</h2>
+        <p class="seats-selected-count">
+          {{ selectedSeats.length }} / {{ numberOfPassengers }} seats selected
+        </p>
       </div>
 
       <!-- Legend -->
@@ -215,6 +202,11 @@
           <div class="seat-preview seat-selected"></div>
           <span>Your Selection</span>
         </div>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="error" class="error-message-modal">
+        {{ error }}
       </div>
 
       <!-- Seat Map -->
@@ -236,7 +228,6 @@
                 (click)="selectSeat(seat)">
                 {{ seat.number }}
               </button>
-              <!-- Aisle after 3rd seat (ABC | DEF) -->
               <div *ngIf="i === 2" class="aisle">
                 <div class="aisle-line"></div>
               </div>
@@ -245,7 +236,23 @@
         </div>
 
         <div class="seat-map-footer">
-          <p>Click on an available seat to select</p>
+          <p>Click seats to select/deselect. Select {{ numberOfPassengers }} seat(s) to continue.</p>
+          
+          <div class="modal-buttons">
+            <button 
+              type="button" 
+              (click)="closeSeatMap()"
+              class="btn-secondary">
+              ← Back
+            </button>
+            <button 
+              type="button"
+              (click)="goToPassengerDetails()"
+              [disabled]="!canProceedToPassengerDetails()"
+              class="btn-primary">
+              Next: Fill Details →
+            </button>
+          </div>
         </div>
       </div>
     </div>

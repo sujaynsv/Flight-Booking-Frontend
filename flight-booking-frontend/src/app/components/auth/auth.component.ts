@@ -55,7 +55,8 @@ export class AuthComponent implements OnInit {
       }
     });
   }
-    getPasswordErrors(): string[] {
+
+  getPasswordErrors(): string[] {
     const errors: string[] = [];
     const passwordControl = this.registerForm.get('password');
     
@@ -112,19 +113,35 @@ export class AuthComponent implements OnInit {
         
         const errorMessage = error.message || 'Login failed. Please try again.';
         
+        // ← CHECK FOR ACCOUNT LOCKOUT
+        if (errorMessage.includes('Account is locked')) {
+          this.error = errorMessage;
+          this.cdr.detectChanges();
+        } 
+        // ← CHECK FOR FAILED ATTEMPTS WARNING
+        else if (errorMessage.includes('attempt(s) remaining')) {
+          this.error = errorMessage;
+          this.cdr.detectChanges();
+        }
+        // ← CHECK FOR TOO MANY ATTEMPTS (ACCOUNT JUST LOCKED)
+        else if (errorMessage.includes('Too many failed login attempts')) {
+          this.error = errorMessage;
+          this.cdr.detectChanges();
+        }
         // ← CHECK IF PASSWORD EXPIRED
-        if (errorMessage.includes('Password has expired') || 
-            errorMessage.includes('expired')) {
+        else if (errorMessage.includes('Password has expired') || 
+                 errorMessage.includes('expired')) {
           
           // Store email for password reset
           localStorage.setItem('passwordResetEmail', email);
           
           // Redirect to change password page
           this.router.navigate(['/change-password'], {
-            queryParams: { expired: true }
+            queryParams: { expired: 'true' }
           });
-        } else {
-          // Show normal error
+        } 
+        // ← GENERIC ERROR (INVALID CREDENTIALS)
+        else {
           this.error = errorMessage;
           this.cdr.detectChanges();
         }

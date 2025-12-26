@@ -205,4 +205,3 @@ resetPassword(request: { email: string; code: string; newPassword: string }): Ob
 
 
 }
-

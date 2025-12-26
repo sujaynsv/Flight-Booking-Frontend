@@ -2,19 +2,60 @@
   <h1>My Bookings</h1>
   <p *ngIf="userEmail" class="email-info">Email: {{ userEmail }}</p>
 
+  <!-- Filter Tabs -->
+  <div *ngIf="!loading && bookings.length > 0" class="filter-tabs">
+    <button 
+      type="button"
+      class="filter-tab"
+      [class.active]="selectedFilter === 'ALL'"
+      (click)="setFilter('ALL')">
+      All ({{ getTotalCount() }})
+    </button>
+    <button 
+      type="button"
+      class="filter-tab"
+      [class.active]="selectedFilter === 'CONFIRMED'"
+      (click)="setFilter('CONFIRMED')">
+      Upcoming ({{ getConfirmedCount() }})
+    </button>
+    <button 
+      type="button"
+      class="filter-tab"
+      [class.active]="selectedFilter === 'COMPLETED'"
+      (click)="setFilter('COMPLETED')">
+      Completed ({{ getCompletedCount() }})
+    </button>
+    <button 
+      type="button"
+      class="filter-tab"
+      [class.active]="selectedFilter === 'CANCELLED'"
+      (click)="setFilter('CANCELLED')">
+      Cancelled ({{ getCancelledCount() }})
+    </button>
+  </div>
+
   <p *ngIf="loading" class="loading-message">Loading...</p>
   <p *ngIf="error" class="error-message">{{ error }}</p>
 
   <div *ngIf="!loading">
     <p *ngIf="bookings.length === 0" class="no-bookings">No bookings found</p>
+    <p *ngIf="filteredBookings.length === 0 && bookings.length > 0" class="no-bookings">
+      No {{ selectedFilter.toLowerCase() }} bookings found
+    </p>
 
-    <div *ngFor="let booking of bookings" class="booking-card">
+    <div *ngFor="let booking of filteredBookings" 
+         class="booking-card"
+         [class.completed]="getEffectiveStatus(booking) === 'COMPLETED'">
       
       <div class="booking-header">
         <h3>PNR: {{ booking.pnr }}</h3>
         <span class="status-badge" 
-              [ngClass]="booking.status === 'CONFIRMED' ? 'confirmed' : 'cancelled'">
-          {{ booking.status }}
+              [ngClass]="{
+                'confirmed': getEffectiveStatus(booking) === 'CONFIRMED',
+                'cancelled': getEffectiveStatus(booking) === 'CANCELLED',
+                'completed': getEffectiveStatus(booking) === 'COMPLETED'
+              }">
+          {{ getEffectiveStatus(booking) }}
         </span>
       </div>
 
@@ -36,7 +77,8 @@
         </div>
       </div>
 
-      <button *ngIf="booking.status === 'CONFIRMED' && confirmingPnr !== booking.pnr"
+      <!-- Only show cancel button for upcoming confirmed bookings -->
+      <button *ngIf="getEffectiveStatus(booking) === 'CONFIRMED' && confirmingPnr !== booking.pnr"
               (click)="askCancelConfirmation(booking.pnr)"
               class="btn-cancel">
         Cancel Booking

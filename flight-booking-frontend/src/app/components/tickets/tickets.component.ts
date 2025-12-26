@@ -1,8 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BookingService } from '../../services/booking.service';
 import { AuthService } from '../../services/auth.service';
-import { Booking } from '../../models/booking.model';
 
 @Component({
   selector: 'app-tickets',
@@ -12,106 +11,176 @@ import { Booking } from '../../models/booking.model';
   styleUrls: ['./ticket.component.css']
 })
 export class TicketsComponent implements OnInit {
-  bookings: Booking[] = [];
-  loading = false;
+  bookings: any[] = [];
+  filteredBookings: any[] = [];
+  userEmail: string = '';
+  loading: boolean = true;
   error: string | null = null;
-  userEmail = '';
-
+  
+  // Filter state - Added COMPLETED
+  selectedFilter: 'ALL' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' = 'ALL';
+  
+  // Cancellation state
   confirmingPnr: string | null = null;
   cancellingPnr: string | null = null;
-
-  errorMessage: string | null = null;
-  errorFlagFromCancelBooking = false;
+  errorFlagFromCancelBooking: boolean = false;
+  errorMessage: string = '';
 
   constructor(
     private bookingService: BookingService,
-    private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    const user = this.authService.getCurrentUserValue();
-    if (user?.email) {
-      this.userEmail = user.email;
-      this.loadBookingHistory();
-    } else {
-      this.error = 'Please login to view ticket.';
-    }
+    // Get user email from auth service
+    this.authService.currentUser$.subscribe({
+      next: (user) => {
+        if (user?.email) {
+          this.userEmail = user.email;
+          this.loadBookings();
+        } else {
+          this.error = 'User not logged in';
+          this.loading = false;
+        }
+      },
+      error: (err) => {
+        console.error('Failed to get user:', err);
+        this.error = 'Failed to get user information';
+        this.loading = false;
+      }
+    });
   }
 
-loadBookingHistory(): void {
-  this.loading = true;
-  this.bookingService.getBookingHistory(this.userEmail).subscribe({
-    next: (bookings) => {
-      this.bookings = bookings.sort((a, b) => {
-        if (a.status === 'CONFIRMED' && b.status !== 'CONFIRMED') return -1;
-        if (a.status !== 'CONFIRMED' && b.status === 'CONFIRMED') return 1;
-        return 0;
-      });
-      this.loading = false;
-      this.cdr.detectChanges();
-    },
-    error: () => {
-      this.error = 'Failed to load booking history';
-      this.loading = false;
-      this.cdr.detectChanges();
+  loadBookings(): void {
+    this.loading = true;
+    this.error = null;
+
+    this.bookingService.getBookingHistory(this.userEmail).subscribe({
+      next: (bookings) => {
+        console.log('Bookings loaded:', bookings);
+        this.bookings = bookings;
+        this.applyFilter(); // Apply filter after loading
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load bookings:', err);
+        this.error = 'Failed to load bookings';
+        this.loading = false;
+      }
+    });
+  }
+
+  // Check if booking journey date has passed
+  isBookingCompleted(journeyDate: string): boolean {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset to start of day
+    
+    const journey = new Date(journeyDate);
+    journey.setHours(0, 0, 0, 0); // Reset to start of day
+    
+    return journey < today;
+  }
+
+  // Get effective status (includes COMPLETED for past dates)
+  getEffectiveStatus(booking: any): string {
+    if (booking.status === 'CONFIRMED' && this.isBookingCompleted(booking.journeyDate)) {
+      return 'COMPLETED';
     }
-  });
-}
+    return booking.status;
+  }
 
+  // Filter methods
+  setFilter(filter: 'ALL' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'): void {
+    this.selectedFilter = filter;
+    this.applyFilter();
+  }
 
+  applyFilter(): void {
+    if (this.selectedFilter === 'ALL') {
+      this.filteredBookings = this.bookings;
+    } else if (this.selectedFilter === 'CONFIRMED') {
+      // Show only upcoming confirmed bookings
+      this.filteredBookings = this.bookings.filter(
+        booking => booking.status === 'CONFIRMED' && !this.isBookingCompleted(booking.journeyDate)
+      );
+    } else if (this.selectedFilter === 'CANCELLED') {
+      this.filteredBookings = this.bookings.filter(
+        booking => booking.status === 'CANCELLED'
+      );
+    } else if (this.selectedFilter === 'COMPLETED') {
+      // Show completed bookings (confirmed + past date)
+      this.filteredBookings = this.bookings.filter(
+        booking => booking.status === 'CONFIRMED' && this.isBookingCompleted(booking.journeyDate)
+      );
+    }
+    console.log('Filtered bookings:', this.filteredBookings);
+  }
+
+  getTotalCount(): number {
+    return this.bookings.length;
+  }
+
+  getConfirmedCount(): number {
+    // Only upcoming confirmed bookings
+    return this.bookings.filter(b => 
+      b.status === 'CONFIRMED' && !this.isBookingCompleted(b.journeyDate)
+    ).length;
+  }
+
+  getCancelledCount(): number {
+    return this.bookings.filter(b => b.status === 'CANCELLED').length;
+  }
+
+  getCompletedCount(): number {
+    return this.bookings.filter(b => 
+      b.status === 'CONFIRMED' && this.isBookingCompleted(b.journeyDate)
+    ).length;
+  }
+
+  // Cancellation methods
   askCancelConfirmation(pnr: string): void {
     this.confirmingPnr = pnr;
     this.errorFlagFromCancelBooking = false;
-    this.errorMessage = null;
+    this.errorMessage = '';
   }
 
   closeCancelConfirm(): void {
     this.confirmingPnr = null;
   }
 
-  clearCancelError(): void {
-    this.errorFlagFromCancelBooking = false;
-    this.errorMessage = null;
-    this.cdr.detectChanges();
-  }
-
   confirmCancellation(pnr: string): void {
-    if (this.cancellingPnr) return;
-
     this.cancellingPnr = pnr;
-
+    this.errorFlagFromCancelBooking = false;
+    
     this.bookingService.cancelBooking(pnr).subscribe({
-      next: () => {
-        this.cancellingPnr = null;
+      next: (response) => {
+        console.log('Booking cancelled:', response);
+        
+        // Update booking status in the list
+        const booking = this.bookings.find(b => b.pnr === pnr);
+        if (booking) {
+          booking.status = 'CANCELLED';
+        }
+        
+        // Reapply filter after status change
+        this.applyFilter();
+        
+        // Reset state
         this.confirmingPnr = null;
-        this.loadBookingHistory();
+        this.cancellingPnr = null;
       },
       error: (err) => {
-        this.errorMessage = err.error.message;
+        console.error('Cancel failed:', err);
+        this.errorMessage = err.error?.message || err.error?.error || 'Cancellation failed';
         this.errorFlagFromCancelBooking = true;
-        this.cancellingPnr = null;
         this.confirmingPnr = null;
-        this.cdr.detectChanges();
+        this.cancellingPnr = null;
       }
     });
   }
+
+  clearCancelError(): void {
+    this.errorFlagFromCancelBooking = false;
+    this.errorMessage = '';
+  }
 }
-
-  // cancelBooking(pnr: string): void {
-  //   if (!confirm(`Are you sure you want to cancel booking ${pnr}?`)) {
-  //     return;
-  //   }
-
-  //   this.bookingService.cancelBooking(pnr).subscribe({
-  //     next: () => {
-  //       alert('Booking cancelled successfully!');
-  //       this.loadBookingHistory(); 
-  //     },
-  //     error: (err) => {
-  //       console.error('Cancel error:', err);
-  //       alert('Failed to cancel booking');
-  //     }
-  //   });
-  // }
-
